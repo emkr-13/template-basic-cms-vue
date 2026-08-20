@@ -1,30 +1,16 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { onMounted, ref } from 'vue';
 import logoUrl from '../../../asset/icon.png';
+import CheckboxInput from '../../Components/CheckboxInput.vue';
+import PrimaryButton from '../../Components/PrimaryButton.vue';
+import TextInput from '../../Components/TextInput.vue';
+import ThemeToggle from '../../Components/ThemeToggle.vue';
 
 const form = useForm({
     email: '',
     password: '',
     remember: false
 });
-
-const isDark = ref(false);
-
-onMounted(() => {
-    isDark.value = localStorage.getItem('theme') === 'dark';
-});
-
-function toggleTheme() {
-    isDark.value = !isDark.value;
-    if (isDark.value) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-    }
-}
 
 const submit = () => {
     form.post('/login');
@@ -42,19 +28,7 @@ const submit = () => {
 
         <!-- Top Corner Theme Toggle -->
         <div class="w-full max-w-md flex justify-end pt-2">
-            <button
-                type="button"
-                class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-all"
-                :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
-                @click="toggleTheme"
-            >
-                <svg v-if="isDark" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <svg v-else class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-            </button>
+            <ThemeToggle />
         </div>
 
         <div class="w-full max-w-md my-auto">
@@ -70,66 +44,49 @@ const submit = () => {
             <!-- Login Card -->
             <form class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/80 p-6 sm:p-8 shadow-xl dark:shadow-2xl backdrop-blur-md transition-colors" @submit.prevent="submit">
                 <!-- Email Field -->
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Email Address</label>
-                    <div class="relative mt-2">
-                        <input
-                            v-model="form.email"
-                            type="email"
-                            autocomplete="email"
-                            required
-                            placeholder="admin@example.com"
-                            class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-950/80 dark:text-white dark:placeholder-slate-500 transition-all"
-                        />
-                    </div>
-                    <p v-if="form.errors.email" class="mt-2 text-xs font-medium text-red-600 dark:text-red-400">{{ form.errors.email }}</p>
-                </div>
+                <TextInput
+                    v-model="form.email"
+                    label="Email Address"
+                    type="email"
+                    required
+                    autocomplete="email"
+                    placeholder="admin@example.com"
+                    :error="form.errors.email"
+                />
 
                 <!-- Password Field -->
                 <div class="mt-5">
-                    <div class="flex items-center justify-between">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Password</label>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Password *</label>
                         <Link href="/forgot-password" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline transition-colors">
                             Forgot password?
                         </Link>
                     </div>
-                    <div class="relative mt-2">
-                        <input
-                            v-model="form.password"
-                            type="password"
-                            autocomplete="current-password"
-                            required
-                            placeholder="••••••••"
-                            class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-950/80 dark:text-white dark:placeholder-slate-500 transition-all"
-                        />
-                    </div>
-                    <p v-if="form.errors.password" class="mt-2 text-xs font-medium text-red-600 dark:text-red-400">{{ form.errors.password }}</p>
+                    <TextInput
+                        v-model="form.password"
+                        type="password"
+                        required
+                        autocomplete="current-password"
+                        placeholder="••••••••"
+                        :error="form.errors.password"
+                    />
                 </div>
 
                 <!-- Remember Me Checkbox -->
                 <div class="mt-5 flex items-center">
-                    <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
-                        <input
-                            v-model="form.remember"
-                            type="checkbox"
-                            class="h-4 w-4 rounded border-slate-300 bg-white text-indigo-600 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950"
-                        />
-                        <span>Remember me on this device</span>
-                    </label>
+                    <CheckboxInput v-model="form.remember" label="Remember me on this device" />
                 </div>
 
                 <!-- Submit Button -->
-                <button
-                    :disabled="form.processing"
-                    type="submit"
-                    class="mt-6 w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 active:scale-[0.99] disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-                >
-                    <svg v-if="form.processing" class="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>{{ form.processing ? 'Signing in...' : 'Sign In' }}</span>
-                </button>
+                <div class="mt-6">
+                    <PrimaryButton
+                        type="submit"
+                        :loading="form.processing"
+                        custom-class="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 active:scale-[0.99] disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                    >
+                        <span>{{ form.processing ? 'Signing in...' : 'Sign In' }}</span>
+                    </PrimaryButton>
+                </div>
             </form>
         </div>
 

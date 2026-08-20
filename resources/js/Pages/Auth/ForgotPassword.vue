@@ -1,25 +1,11 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { onMounted, ref } from 'vue';
 import logoUrl from '../../../asset/icon.png';
+import PrimaryButton from '../../Components/PrimaryButton.vue';
+import TextInput from '../../Components/TextInput.vue';
+import ThemeToggle from '../../Components/ThemeToggle.vue';
 
 const form = useForm({ email: '' });
-const isDark = ref(false);
-
-onMounted(() => {
-    isDark.value = localStorage.getItem('theme') === 'dark';
-});
-
-function toggleTheme() {
-    isDark.value = !isDark.value;
-    if (isDark.value) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-    }
-}
 
 const submit = () => {
     form.post('/forgot-password');
@@ -35,19 +21,7 @@ const submit = () => {
         </div>
 
         <div class="w-full max-w-md flex justify-end pt-2">
-            <button
-                type="button"
-                class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-all"
-                :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
-                @click="toggleTheme"
-            >
-                <svg v-if="isDark" class="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <svg v-else class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-            </button>
+            <ThemeToggle />
         </div>
 
         <div class="w-full max-w-md my-auto">
@@ -60,25 +34,24 @@ const submit = () => {
             </div>
 
             <form class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/80 p-6 sm:p-8 shadow-xl dark:shadow-2xl backdrop-blur-md transition-colors" @submit.prevent="submit">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Email Address</label>
-                    <input
-                        v-model="form.email"
-                        type="email"
-                        required
-                        placeholder="you@example.com"
-                        class="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-950/80 dark:text-white dark:placeholder-slate-500 transition-all"
-                    />
-                    <p v-if="form.errors.email" class="mt-2 text-xs font-medium text-red-600 dark:text-red-400">{{ form.errors.email }}</p>
-                </div>
+                <TextInput
+                    v-model="form.email"
+                    label="Email Address"
+                    type="email"
+                    required
+                    placeholder="you@example.com"
+                    :error="form.errors.email"
+                />
 
-                <button
-                    :disabled="form.processing"
-                    type="submit"
-                    class="mt-6 w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-                >
-                    <span>{{ form.processing ? 'Sending Link...' : 'Send Password Reset Link' }}</span>
-                </button>
+                <div class="mt-6">
+                    <PrimaryButton
+                        type="submit"
+                        :loading="form.processing"
+                        custom-class="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                    >
+                        <span>{{ form.processing ? 'Sending Link...' : 'Send Password Reset Link' }}</span>
+                    </PrimaryButton>
+                </div>
 
                 <div class="mt-6 text-center">
                     <Link href="/login" class="text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">

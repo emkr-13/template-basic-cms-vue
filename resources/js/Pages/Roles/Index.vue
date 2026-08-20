@@ -1,5 +1,9 @@
 <script setup>
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import Card from '../../Components/Card.vue';
+import DangerButton from '../../Components/DangerButton.vue';
+import PrimaryButton from '../../Components/PrimaryButton.vue';
+import StatusBadge from '../../Components/StatusBadge.vue';
 import AuthenticatedLayout from '../../Layouts/AuthenticatedLayout.vue';
 
 defineProps({
@@ -20,33 +24,30 @@ const remove = role => {
     <Head title="Role Management — CMS Template" />
 
     <AuthenticatedLayout title="Role Management">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80 backdrop-blur-sm transition-colors">
-            <!-- Header -->
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-5 border-b border-slate-200 dark:border-slate-800">
+        <Card title="Role Management" subtitle="Configure permission scopes and operational roles for users.">
+            <template #header>
                 <div>
                     <h1 class="text-xl font-bold text-slate-900 dark:text-white sm:text-2xl">Role Management</h1>
                     <p class="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400">Configure permission scopes and operational roles for users.</p>
                 </div>
 
-                <Link
-                    v-if="can('role.create')"
-                    href="/roles/create"
-                    class="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 transition-all self-start sm:self-auto"
-                >
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>Add Role</span>
+                <Link v-if="can('role.create')" href="/roles/create">
+                    <PrimaryButton type="button">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Add Role</span>
+                    </PrimaryButton>
                 </Link>
-            </div>
+            </template>
 
             <!-- Error Banner -->
-            <div v-if="$page.props.errors?.role" class="mt-4 rounded-xl bg-red-50 border border-red-200 text-red-700 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400 px-4 py-3 text-xs">
+            <div v-if="$page.props.errors?.role" class="mb-4 rounded-xl bg-red-50 border border-red-200 text-red-700 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400 px-4 py-3 text-xs">
                 {{ $page.props.errors.role }}
             </div>
 
             <!-- Desktop View: Table -->
-            <div class="mt-6 hidden overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 md:block">
+            <div class="hidden overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 md:block">
                 <table class="w-full text-left text-xs text-slate-700 dark:text-slate-300">
                     <thead class="bg-slate-100/80 text-slate-700 dark:bg-slate-950/80 uppercase tracking-wider dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                         <tr>
@@ -67,14 +68,14 @@ const remove = role => {
                                 </div>
                             </td>
                             <td class="px-4 py-3.5">
-                                <span class="rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 px-2.5 py-1 text-[11px] font-semibold border border-indigo-200 dark:border-indigo-500/20">
+                                <StatusBadge type="indigo">
                                     {{ role.permissions_count }} permissions
-                                </span>
+                                </StatusBadge>
                             </td>
                             <td class="px-4 py-3.5">
-                                <span class="rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 px-2.5 py-1 text-[11px] font-medium border border-slate-200 dark:border-slate-700">
+                                <StatusBadge type="default">
                                     {{ role.users_count }} users
-                                </span>
+                                </StatusBadge>
                             </td>
                             <td class="px-4 py-3.5 text-right font-medium">
                                 <div class="flex items-center justify-end gap-3">
@@ -85,13 +86,9 @@ const remove = role => {
                                     >
                                         Edit
                                     </Link>
-                                    <button
-                                        v-if="can('role.delete')"
-                                        class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-                                        @click="remove(role)"
-                                    >
+                                    <DangerButton v-if="can('role.delete')" @click="remove(role)">
                                         Delete
-                                    </button>
+                                    </DangerButton>
                                 </div>
                             </td>
                         </tr>
@@ -105,7 +102,7 @@ const remove = role => {
             </div>
 
             <!-- Mobile View: Touch Cards (HP Friendly) -->
-            <div class="mt-6 space-y-3 md:hidden">
+            <div class="space-y-3 md:hidden">
                 <div
                     v-for="role in roles"
                     :key="role.id"
@@ -119,9 +116,9 @@ const remove = role => {
                             <div class="font-semibold text-slate-900 dark:text-white text-sm">{{ role.name }}</div>
                         </div>
 
-                        <span class="rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 px-2.5 py-0.5 text-[10px] font-semibold border border-indigo-200 dark:border-indigo-500/20">
+                        <StatusBadge type="indigo">
                             {{ role.permissions_count }} permissions
-                        </span>
+                        </StatusBadge>
                     </div>
 
                     <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-200 dark:border-slate-800/80">
@@ -135,13 +132,9 @@ const remove = role => {
                             >
                                 Edit
                             </Link>
-                            <button
-                                v-if="can('role.delete')"
-                                class="rounded-lg bg-red-50 border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 dark:bg-red-600/10 dark:border-red-500/20 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all"
-                                @click="remove(role)"
-                            >
+                            <DangerButton v-if="can('role.delete')" @click="remove(role)">
                                 Delete
-                            </button>
+                            </DangerButton>
                         </div>
                     </div>
                 </div>
@@ -150,6 +143,6 @@ const remove = role => {
                     No custom roles defined yet.
                 </div>
             </div>
-        </div>
+        </Card>
     </AuthenticatedLayout>
 </template>

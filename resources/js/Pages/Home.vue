@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import Card from '../Components/Card.vue';
 import AuthenticatedLayout from '../Layouts/AuthenticatedLayout.vue';
 
 const page = usePage();
@@ -42,7 +43,7 @@ const can = permission => user.value?.isSuperAdmin || user.value?.permissions?.i
             <!-- Quick Action Cards Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- User Control Card -->
-                <div class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-5 shadow-sm backdrop-blur-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+                <Card custom-class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-5 shadow-sm backdrop-blur-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between">
                             <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
@@ -61,10 +62,10 @@ const can = permission => user.value?.isSuperAdmin || user.value?.permissions?.i
                         </Link>
                         <span v-else class="text-xs text-slate-400">Restricted</span>
                     </div>
-                </div>
+                </Card>
 
                 <!-- Role Control Card -->
-                <div class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-5 shadow-sm backdrop-blur-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+                <Card custom-class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-5 shadow-sm backdrop-blur-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between">
                             <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
@@ -83,10 +84,10 @@ const can = permission => user.value?.isSuperAdmin || user.value?.permissions?.i
                         </Link>
                         <span v-else class="text-xs text-slate-400">Restricted</span>
                     </div>
-                </div>
+                </Card>
 
                 <!-- Template Attribution Card -->
-                <div class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-5 shadow-sm backdrop-blur-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all sm:col-span-2 lg:col-span-1 flex flex-col justify-between">
+                <Card custom-class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-5 shadow-sm backdrop-blur-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all sm:col-span-2 lg:col-span-1 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between">
                             <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
@@ -104,7 +105,7 @@ const can = permission => user.value?.isSuperAdmin || user.value?.permissions?.i
                             Security Settings &rarr;
                         </Link>
                     </div>
-                </div>
+                </Card>
             </div>
         </div>
     </AuthenticatedLayout>

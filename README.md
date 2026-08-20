@@ -292,31 +292,133 @@ docker compose -f compose.dev.yaml exec app php artisan test --coverage
 
 ---
 
-## 🚢 Production Deployment
+## 🚢 Production Deployment (Panduan Lengkap VPS Kosong hingga HTTPS)
 
-Pada server production, aplikasi menggunakan file `.env.prod` dan dikonfigurasi melalui `compose.prod.yaml`.
+Pada server production (seperti DigitalOcean, AWS, Linode, VPS Ubuntu 22.04/24.04), aplikasi dikonfigurasi menggunakan `compose.prod.yaml` dan file `.env.prod`.
 
-### 1. Konfigurasi File Environment
+---
+
+### 1. Persiapan VPS Baru (Fresh VPS Setup)
+
+Buka koneksi SSH ke VPS baru Anda dan jalankan instalasi **Docker**, **Nginx Host**, dan **Certbot**:
+
 ```bash
+# 1. Update package system & install dependency awal
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl git nginx certbot python3-certbot-nginx
+
+# 2. Install Docker Engine resmi
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+---
+
+### 2. Clone Repositori & Konfigurasi File Environment
+
+```bash
+# 1. Clone repositori ke VPS
+git clone <URL_REPOSITORI_ANDA> /var/www/cms-app
+cd /var/www/cms-app
+
+# 2. Salin file environment production
 cp .env.prod.example .env.prod
 ```
-Isi `APP_KEY`, domain production, serta kredensial database production.
 
-> Production menggunakan database eksternal. Tetap jalankan Vite di host hanya untuk development; asset production dibangun ke image Docker.
+Edit file `.env.prod` (`nano .env.prod`) dan sesuaikan konfigurasi berikut:
+- `APP_KEY=`: (Akan digenerate di langkah berikutnya).
+- `APP_URL=https://cms.domainanda.com`
+- `DB_HOST=`: Alamat server database MySQL Anda (misal `127.0.0.1` atau Host IP).
+- `DB_DATABASE=`, `DB_USERNAME=`, `DB_PASSWORD=`
+- `MAIL_MAILER=smtp` beserta kredensial SMTP email.
 
-### 2. Pengaturan Mailer SMTP
-Pastikan `MAIL_MAILER=smtp` beserta kredensial SMTP diisi dengan benar agar sistem dapat mengirimkan email undangan user dan reset password.
+---
 
-### 3. Deploy Container Production & Super Admin
+### 3. Inisialisasi Container Production & Key Generation
+
 ```bash
+# 1. Jalankan container pertama kali
 docker compose -f compose.prod.yaml up --build -d
+
+# 2. Generate APP_KEY di environment production
+docker compose -f compose.prod.yaml exec app php artisan key:generate --force
+
+# 3. Inisialisasi Role & buat akun Super Admin pertama
+docker compose -f compose.prod.yaml exec app php artisan role:init
 docker compose -f compose.prod.yaml exec app php artisan make:super-admin
 ```
-- Aplikasi production tersedia di **`http://localhost:8080`** (atau via reverse proxy Nginx/Traefik).
-- Asset Vue/CSS sudah otomatis di-build di dalam image production (tidak memerlukan `npm run dev`).
-- Service `deploy` menjalankan migration dan cache satu kali sebelum service runtime aktif; restart worker tidak mengulangi migration.
-- Volume `storage` dibagikan ke PHP-FPM, queue, scheduler, dan Nginx agar upload lokal tidak hilang saat container diganti.
-- Swagger hanya dapat diakses Super Admin saat `APP_ENV=production`.
+
+> **💡 Catatan Service Deploy:** Service `deploy` pada `compose.prod.yaml` secara otomatis memproses `php artisan migrate --force` dan caching (`config:cache`, `route:cache`, `view:cache`) setiap kali container production di-up/rebuild.
+
+---
+
+### 4. Konfigurasi Nginx Host & SSL HTTPS (Certbot)
+
+Aplikasi production berjalan di port `8080` di dalam Docker. Konfigurasikan Nginx di host machine sebagai **Reverse Proxy** dan pasang SSL HTTPS gratis via Certbot.
+
+#### A. Buat Konfigurasi Block Nginx:
+```bash
+sudo nano /etc/nginx/sites-available/cms-app
+```
+
+Isikan dengan konfigurasi berikut (ganti `cms.domainanda.com` dengan domain asli Anda):
+
+```nginx
+server {
+    listen 80;
+    server_name cms.domainanda.com;
+
+    client_max_body_size 20M;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+#### B. Aktifkan Site & Sertifikat SSL Certbot:
+```bash
+# 1. Symlink konfigurasi Nginx
+sudo ln -s /etc/nginx/sites-available/cms-app /etc/nginx/sites-enabled/
+
+# 2. Uji sintaks Nginx & reload
+sudo nginx -t
+sudo systemctl reload nginx
+
+# 3. Dapatkan Sertifikat SSL HTTPS Otomatis dari Let's Encrypt
+sudo certbot --nginx -d cms.domainanda.com
+```
+*Certbot akan otomatis memperbarui konfigurasi Nginx menjadi HTTPS (Port 443) dan mengatur Auto-Renewal SSL.*
+
+Aplikasi CMS Production Anda kini resmi aktif & aman di **`https://cms.domainanda.com`**! 🎉
+
+---
+
+### 🔄 5. Alur Pembaruan Aplikasi di Production (Deploying Updates)
+
+Setiap kali Anda merilis fitur baru atau melakukan `git push` dari komputer lokal, ikuti alur **DevOps Best Practice** berikut di server VPS:
+
+```bash
+# 1. Tarik pembaruan kode terbaru dari git
+git pull origin main
+
+# 2. Build image production terlebih dahulu (Isolasi Keamanan Build)
+docker compose -f compose.prod.yaml build
+
+# 3. Restrukturisasi & jalankan container baru serta bersihkan container yatim (clean up)
+docker compose -f compose.prod.yaml up -d --remove-orphans
+```
+
+> **💡 Keunggulan Metode Ini:**
+> - **Build Terpisah (`build`)**: Jika ada *syntax error* atau kegagalan saat build image, container production lama **tetap berjalan aktif** tanpa mengalami *downtime*.
+> - **Clean Up (`--remove-orphans`)**: Menghapus container/service lama yang mungkin sudah tidak terikat di `compose.prod.yaml` sehingga resource VPS tidak terbuang sia-sia.
+> - **Otomatisasi Migration & Cache**: Service `deploy` akan tetap otomatis mengeksekusi migrasi database baru dan me-refresh cache (`route`, `config`, `view`) tanpa perlu langkah manual.
 
 ---
 
@@ -326,6 +428,7 @@ docker compose -f compose.prod.yaml exec app php artisan make:super-admin
 |---|---|
 | **Start Dev Container** | `docker compose -f compose.dev.yaml up -d` |
 | **Stop Dev Container** | `docker compose -f compose.dev.yaml down` |
+| **Deploy Production (Build & Up)** | `docker compose -f compose.prod.yaml build && docker compose -f compose.prod.yaml up -d --remove-orphans` |
 | **Exec Artisan** | `docker compose -f compose.dev.yaml exec app php artisan <command>` |
 | **Run Migration** | `docker compose -f compose.dev.yaml exec app php artisan migrate` |
 | **Init Roles & Super Admin** | `docker compose -f compose.dev.yaml exec app php artisan role:init` |

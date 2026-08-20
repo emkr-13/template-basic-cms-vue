@@ -24,6 +24,10 @@ Template starter-kit CMS profesional berbasis **Laravel 12**, **Inertia.js v3**,
   - [Instalasi Boost di Docker](#1-instalasi--instalasi-ulang-boost-di-docker)
   - [Konfigurasi MCP Server (`mcp.json`)](#2-konfigurasi-mcp-server-mcpjson)
   - [Pembaruan Guidelines AI (`artisan boost:update`)](#3-pembaruan-guidelines-ai-artisan-boostupdate)
+- [Testing Setup & Execution (.env.testing)](#-testing-setup--execution-envtesting)
+  - [Persiapan File Environment Testing](#1-persiapan-file-environment-testing)
+  - [Strategi Database Testing (Senior QA & Backend Standard)](#2-strategi-database-testing-senior-qa--backend-standard)
+  - [Menjalankan Testing di Docker Container](#3-menjalankan-testing-di-docker-container)
 - [Production Deployment](#-production-deployment)
 - [Command Cheat Sheet](#-command-cheat-sheet)
 - [Lisensi](#-lisensi)
@@ -163,6 +167,75 @@ docker compose -f compose.dev.yaml exec app php artisan boost:update
 
 ---
 
+## 🧪 Testing Setup & Execution (.env.testing)
+
+Aplikasi ini menggunakan konfigurasi environment khusus pengujian melalui `.env.testing` dan `.env.testing.example` untuk memastikan isolasi penuh antara data pengujian dan database development lokal/production.
+
+### 1. Persiapan File Environment Testing
+Salin file `.env.testing.example` menjadi `.env.testing`:
+```bash
+cp .env.testing.example .env.testing
+```
+*Catatan:* File `.env.testing` telah secara otomatis dimasukkan ke `.gitignore` agar opsi testing lokal setiap pengembang tidak bentrok di repositori.
+
+### 2. Strategi Database Testing (Senior QA & Backend Standard)
+
+Terdapat dua pendekatan strategi database untuk pengujian:
+
+1. **Opsi 1: Fast In-Memory SQLite (Default & Recommended for CI/Fast Feedback)**
+   - Performa super cepat (eksekusi test di RAM tanpa I/O disk).
+   - Tanpa perlu setup database tambahan di MySQL.
+   - Konfigurasi di `.env.testing`:
+     ```env
+     DB_CONNECTION=sqlite
+     DB_DATABASE=:memory:
+     ```
+
+2. **Opsi 2: Dedicated MySQL Test Database (Full MySQL Feature Parity)**
+   - Digunakan jika terdapat feature test yang memerlukan spesifik fitur MySQL (misal: JSON column querying, stored procedure, atau raw MySQL query).
+   - Buat database khusus testing di MySQL host:
+     ```bash
+     mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS sample_template_cms_vue_test;"
+     ```
+   - Sesuaikan `.env.testing` untuk menggunakan MySQL:
+     ```env
+     DB_CONNECTION=mysql
+     DB_HOST=127.0.0.1
+     DB_PORT=3306
+     DB_DATABASE=sample_template_cms_vue_test
+     DB_USERNAME=root
+     DB_PASSWORD=
+     ```
+     *(Di dalam Docker container `compose.dev.yaml`, `DB_HOST` otomatis dialihkan ke `host.docker.internal`)*
+
+### 3. Best Practice Testing Configuration
+- **Hashing Speedup (`BCRYPT_ROUNDS=4`)**: Mengurangi alokasi waktu hashing password saat membuat dummy user dengan factory.
+- **State Isolation**: `CACHE_STORE=array`, `SESSION_DRIVER=array`, dan `QUEUE_CONNECTION=sync` untuk mencegah *leaking state* antar unit test.
+- **Mail Trap (`MAIL_MAILER=array`)**: Mencegah pengiriman email asli saat pengujian berjalan.
+
+### 4. Menjalankan Testing di Docker Container
+
+Gunakan perintah Artisan `test` di dalam container Docker development:
+
+```bash
+# 1. Jalankan seluruh suite test (Unit & Feature)
+docker compose -f compose.dev.yaml exec app php artisan test
+
+# 2. Jalankan test pada file tertentu
+docker compose -f compose.dev.yaml exec app php artisan test tests/Feature/Console/MakeSuperAdminCommandTest.php
+
+# 3. Filter pengujian berdasarkan nama method / class
+docker compose -f compose.dev.yaml exec app php artisan test --filter=MakeSuperAdmin
+
+# 4. Jalankan test secara paralel untuk akselerasi eksekusi
+docker compose -f compose.dev.yaml exec app php artisan test --parallel
+
+# 5. Jalankan test dengan laporan code coverage (jika Xdebug/PCOV aktif)
+docker compose -f compose.dev.yaml exec app php artisan test --coverage
+```
+
+---
+
 ## 🚢 Production Deployment
 
 Pada server production, aplikasi menggunakan file `.env.prod` dan dikonfigurasi melalui `compose.prod.yaml`.
@@ -197,7 +270,10 @@ docker compose -f compose.prod.yaml exec app php artisan make:super-admin
 | **Run Migration** | `docker compose -f compose.dev.yaml exec app php artisan migrate` |
 | **Run Seeder** | `docker compose -f compose.dev.yaml exec app php artisan db:seed` |
 | **Create Super Admin** | `docker compose -f compose.dev.yaml exec app php artisan make:super-admin` |
-| **Run Tests** | `docker compose -f compose.dev.yaml exec app php artisan test` |
+| **Run All Tests** | `docker compose -f compose.dev.yaml exec app php artisan test` |
+| **Run Specific Test** | `docker compose -f compose.dev.yaml exec app php artisan test tests/Feature/Console/MakeSuperAdminCommandTest.php` |
+| **Run Filtered Tests** | `docker compose -f compose.dev.yaml exec app php artisan test --filter=<Name>` |
+| **Run Parallel Tests** | `docker compose -f compose.dev.yaml exec app php artisan test --parallel` |
 | **Format Code (Pint)** | `docker compose -f compose.dev.yaml exec app vendor/bin/pint` |
 | **Clear App Cache** | `docker compose -f compose.dev.yaml exec app php artisan optimize:clear` |
 | **Update Boost Rules** | `docker compose -f compose.dev.yaml exec app php artisan boost:update` |

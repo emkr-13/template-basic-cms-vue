@@ -32,8 +32,9 @@ class RoleController extends Controller
 
     public function store(StoreRoleRequest $request): RedirectResponse
     {
+        $permissions = $this->allowedPermissions($request->input('permissions', []));
         $role = Role::create(['name' => $request->string('name')->toString(), 'guard_name' => 'web']);
-        $role->syncPermissions($this->allowedPermissions($request->input('permissions', [])));
+        $role->syncPermissions($permissions);
         $this->forgetPermissionCache();
 
         return redirect()->route('roles.index')->with('success', 'Role berhasil dibuat.');

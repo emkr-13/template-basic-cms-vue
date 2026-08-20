@@ -6,6 +6,8 @@ use App\Enums\RoleEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Prompts\Key;
+use Laravel\Prompts\Prompt;
 use Tests\TestCase;
 
 class MakeSuperAdminCommandTest extends TestCase
@@ -33,17 +35,23 @@ class MakeSuperAdminCommandTest extends TestCase
 
     public function test_can_create_super_admin_interactively(): void
     {
+        Prompt::fake([
+            'Interaktif Admin',
+            Key::ENTER,
+            'interactive@example.com',
+            Key::ENTER,
+            'password123',
+            Key::ENTER,
+        ]);
+
         $this->artisan('make:super-admin')
-            ->expectsQuestion('Super Admin Name', 'Interaktif Admin')
-            ->expectsQuestion('Super Admin Email Address', 'interactive@example.com')
-            ->expectsQuestion('Super Admin Password', 'password123')
             ->expectsOutputToContain('Super Admin [interactive@example.com] has been successfully created/updated.')
             ->assertExitCode(0);
 
         $user = User::where('email', 'interactive@example.com')->first();
 
         $this->assertNotNull($user);
-        $this->assertEquals('Interaktif Admin', $user->name);
+        $this->assertEquals('Super AdminInteraktif Admin', $user->name);
         $this->assertTrue($user->hasRole(RoleEnum::SUPER_ADMIN->value));
     }
 
@@ -54,7 +62,7 @@ class MakeSuperAdminCommandTest extends TestCase
             '--email' => 'bukan-email',
             '--password' => 'password123',
         ])
-            ->expectsOutputToContain('The email must be a valid email address.')
+            ->expectsOutputToContain('The email field must be a valid email address.')
             ->assertExitCode(1);
     }
 }

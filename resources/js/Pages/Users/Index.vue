@@ -2,6 +2,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import Card from '../../Components/Card.vue';
+import ConfirmModal from '../../Components/ConfirmModal.vue';
 import DangerButton from '../../Components/DangerButton.vue';
 import Pagination from '../../Components/Pagination.vue';
 import PopoverModal from '../../Components/PopoverModal.vue';
@@ -21,6 +22,14 @@ const status = ref(props.filters.status || '');
 
 const isRoleModalOpen = ref(false);
 const selectedRole = ref(null);
+
+const confirmModalState = ref({
+    show: false,
+    title: '',
+    message: '',
+    loading: false,
+    item: null
+});
 
 const user = usePage().props.auth.user;
 const can = permission => user?.isSuperAdmin || user?.permissions?.includes(permission);
@@ -42,9 +51,25 @@ const clearFilter = () => {
 const isCurrentUser = item => item.id === user.id;
 
 const remove = item => {
-    if (confirm(`Are you sure you want to delete user "${item.name}"?`)) {
-        router.delete(`/users/${item.id}`);
-    }
+    confirmModalState.value = {
+        show: true,
+        title: 'Delete User Account',
+        message: `Are you sure you want to delete user "${item.name}"? This action cannot be undone.`,
+        loading: false,
+        item
+    };
+};
+
+const handleConfirmDelete = () => {
+    if (!confirmModalState.value.item) return;
+    confirmModalState.value.loading = true;
+    router.delete(`/users/${confirmModalState.value.item.id}`, {
+        onFinish: () => {
+            confirmModalState.value.show = false;
+            confirmModalState.value.loading = false;
+            confirmModalState.value.item = null;
+        }
+    });
 };
 
 function openRoleModal(role) {
@@ -319,5 +344,17 @@ function openRoleModal(role) {
                 </SecondaryButton>
             </template>
         </PopoverModal>
+
+        <!-- Delete Confirmation Modal -->
+        <ConfirmModal
+            v-model:show="confirmModalState.show"
+            variant="danger"
+            :title="confirmModalState.title"
+            :message="confirmModalState.message"
+            confirm-text="Delete User"
+            cancel-text="Cancel"
+            :loading="confirmModalState.loading"
+            @confirm="handleConfirmDelete"
+        />
     </AuthenticatedLayout>
 </template>

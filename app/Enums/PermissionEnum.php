@@ -50,7 +50,7 @@ enum PermissionEnum: string
     /**
      * Auto-resolve required view permissions for any action permission in the same module.
      *
-     * @param array<int, string> $permissions
+     * @param  array<int, string>  $permissions
      * @return array<int, string>
      */
     public static function resolveDependencies(array $permissions): array

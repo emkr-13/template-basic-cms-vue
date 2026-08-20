@@ -6,6 +6,10 @@ import PrimaryButton from '../../Components/PrimaryButton.vue';
 import TextInput from '../../Components/TextInput.vue';
 import ThemeToggle from '../../Components/ThemeToggle.vue';
 
+defineProps({
+    status: String
+});
+
 const form = useForm({
     email: '',
     password: '',
@@ -43,6 +47,19 @@ const submit = () => {
 
             <!-- Login Card -->
             <form class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/80 p-6 sm:p-8 shadow-xl dark:shadow-2xl backdrop-blur-md transition-colors" @submit.prevent="submit">
+                <!-- Status / Flash Alert Notification -->
+                <div
+                    v-if="status || $page.props.flash?.success"
+                    class="mb-5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 p-4 text-xs flex items-start gap-3"
+                >
+                    <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <span>{{ status || $page.props.flash?.success }}</span>
+                    </div>
+                </div>
+
                 <!-- Email Field -->
                 <TextInput
                     v-model="form.email"

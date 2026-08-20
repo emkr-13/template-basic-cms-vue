@@ -1,6 +1,8 @@
 <script setup>
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import Card from '../../Components/Card.vue';
+import ConfirmModal from '../../Components/ConfirmModal.vue';
 import DangerButton from '../../Components/DangerButton.vue';
 import PrimaryButton from '../../Components/PrimaryButton.vue';
 import StatusBadge from '../../Components/StatusBadge.vue';
@@ -13,10 +15,34 @@ defineProps({
 const user = usePage().props.auth.user;
 const can = permission => user?.isSuperAdmin || user?.permissions?.includes(permission);
 
+const confirmModalState = ref({
+    show: false,
+    title: '',
+    message: '',
+    loading: false,
+    role: null
+});
+
 const remove = role => {
-    if (confirm(`Are you sure you want to delete role "${role.name}"?`)) {
-        router.delete(`/roles/${role.id}`);
-    }
+    confirmModalState.value = {
+        show: true,
+        title: 'Delete Role',
+        message: `Are you sure you want to delete role "${role.name}"? Users assigned to this role may lose access permissions.`,
+        loading: false,
+        role
+    };
+};
+
+const handleConfirmDelete = () => {
+    if (!confirmModalState.value.role) return;
+    confirmModalState.value.loading = true;
+    router.delete(`/roles/${confirmModalState.value.role.id}`, {
+        onFinish: () => {
+            confirmModalState.value.show = false;
+            confirmModalState.value.loading = false;
+            confirmModalState.value.role = null;
+        }
+    });
 };
 </script>
 
@@ -144,5 +170,17 @@ const remove = role => {
                 </div>
             </div>
         </Card>
+
+        <!-- Delete Confirmation Modal -->
+        <ConfirmModal
+            v-model:show="confirmModalState.show"
+            variant="danger"
+            :title="confirmModalState.title"
+            :message="confirmModalState.message"
+            confirm-text="Delete Role"
+            cancel-text="Cancel"
+            :loading="confirmModalState.loading"
+            @confirm="handleConfirmDelete"
+        />
     </AuthenticatedLayout>
 </template>

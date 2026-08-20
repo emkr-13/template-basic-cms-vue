@@ -70,15 +70,7 @@ DB_PASSWORD=
 ```
 > 💡 *Catatan:* `compose.dev.yaml` otomatis mengalihkan `DB_HOST` menjadi `host.docker.internal` secara internal di dalam container agar terhubung ke MySQL host. **Jangan ubah `DB_HOST=127.0.0.1` di file `.env`.**
 
-### 2. Kredensial Super Admin Awal
-Isi variabel berikut di file `.env` sebelum melakukan seed database:
-```env
-INITIAL_SUPER_ADMIN_NAME="Super Admin"
-INITIAL_SUPER_ADMIN_EMAIL="admin@example.test"
-INITIAL_SUPER_ADMIN_PASSWORD="GunakanPasswordYangKuat123!"
-```
-
-### 3. Jalankan Docker Container Development
+### 2. Jalankan Docker Container Development
 ```bash
 # 1. Jalankan container di background
 docker compose -f compose.dev.yaml up -d --build
@@ -86,9 +78,16 @@ docker compose -f compose.dev.yaml up -d --build
 # 2. Jalankan migrasi database
 docker compose -f compose.dev.yaml exec app php artisan migrate
 
-# 3. Seed data role, permission, dan Super Admin awal
+# 3. Seed data role dan permission awal
 docker compose -f compose.dev.yaml exec app php artisan db:seed
 ```
+
+### 3. Buat Akun Super Admin
+Jalankan perintah interaktif berikut untuk membuat akun Super Admin:
+```bash
+docker compose -f compose.dev.yaml exec app php artisan make:super-admin
+```
+*(Atau gunakan opsi `--name`, `--email`, `--password` untuk eksekusi non-interaktif)*
 
 ### 4. Jalankan Frontend Vite (Host Machine)
 Buka terminal baru di mesin local dan jalankan Vite dev server:
@@ -172,14 +171,15 @@ Pada server production, aplikasi menggunakan file `.env.prod` dan dikonfigurasi 
 ```bash
 cp .env.prod.example .env.prod
 ```
-Isi `APP_KEY`, domain production, kredensial database production, serta `INITIAL_SUPER_ADMIN_EMAIL` & `INITIAL_SUPER_ADMIN_PASSWORD`.
+Isi `APP_KEY`, domain production, serta kredensial database production.
 
 ### 2. Pengaturan Mailer SMTP
 Pastikan `MAIL_MAILER=smtp` beserta kredensial SMTP diisi dengan benar agar sistem dapat mengirimkan email undangan user dan reset password.
 
-### 3. Deploy Container Production
+### 3. Deploy Container Production & Super Admin
 ```bash
 docker compose -f compose.prod.yaml up --build -d
+docker compose -f compose.prod.yaml exec app php artisan make:super-admin
 ```
 - Aplikasi production tersedia di **`http://localhost:8080`** (atau via reverse proxy Nginx/Traefik).
 - Asset Vue/CSS sudah otomatis di-build di dalam image production (tidak memerlukan `npm run dev`).
@@ -196,6 +196,7 @@ docker compose -f compose.prod.yaml up --build -d
 | **Exec Artisan** | `docker compose -f compose.dev.yaml exec app php artisan <command>` |
 | **Run Migration** | `docker compose -f compose.dev.yaml exec app php artisan migrate` |
 | **Run Seeder** | `docker compose -f compose.dev.yaml exec app php artisan db:seed` |
+| **Create Super Admin** | `docker compose -f compose.dev.yaml exec app php artisan make:super-admin` |
 | **Run Tests** | `docker compose -f compose.dev.yaml exec app php artisan test` |
 | **Format Code (Pint)** | `docker compose -f compose.dev.yaml exec app vendor/bin/pint` |
 | **Clear App Cache** | `docker compose -f compose.dev.yaml exec app php artisan optimize:clear` |

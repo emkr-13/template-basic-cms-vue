@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\RoleEnum;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -47,7 +48,7 @@ class HandleInertiaRequests extends Middleware
                     'status' => $user->status->value,
                     'roles' => $user->getRoleNames()->values(),
                     'permissions' => $user->getAllPermissions()->pluck('name')->values(),
-                    'isSuperAdmin' => $user->hasRole(\App\Enums\RoleEnum::SUPER_ADMIN->value),
+                    'isSuperAdmin' => $user->hasRole(RoleEnum::SUPER_ADMIN->value),
                 ] : null,
             ],
             'flash' => [

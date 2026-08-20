@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\RoleEnum;
+use App\Enums\UserStatusEnum;
 use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -67,6 +68,26 @@ class AuditLogTest extends TestCase
         $this->assertDatabaseHas('activity_logs', [
             'user_id' => $user->id,
             'action' => 'auth.login',
+        ]);
+    }
+
+    public function test_user_management_changes_are_recorded(): void
+    {
+        $superAdmin = User::factory()->create();
+        $superAdmin->assignRole(RoleEnum::SUPER_ADMIN->value);
+        $managedUser = User::factory()->create();
+
+        $this->actingAs($superAdmin)->put(route('users.update', $managedUser), [
+            'name' => 'Updated User',
+            'email' => $managedUser->email,
+            'status' => UserStatusEnum::DISABLED->value,
+        ])->assertRedirect(route('users.index'));
+
+        $this->assertDatabaseHas('activity_logs', [
+            'user_id' => $superAdmin->id,
+            'action' => 'user.updated',
+            'subject_type' => User::class,
+            'subject_id' => $managedUser->id,
         ]);
     }
 }

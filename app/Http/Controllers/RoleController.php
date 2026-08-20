@@ -6,6 +6,7 @@ use App\Enums\PermissionEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use App\Services\ActivityLogService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -38,6 +39,13 @@ class RoleController extends Controller
         $role->syncPermissions($permissions);
         $this->forgetPermissionCache();
 
+        ActivityLogService::log(
+            'role.created',
+            "Pengguna {$request->user()->name} membuat role {$role->name}.",
+            $role,
+            ['permissions' => $permissions]
+        );
+
         return redirect()->route('roles.index')->with('success', 'Role berhasil dibuat.');
     }
 
@@ -55,8 +63,16 @@ class RoleController extends Controller
     {
         $this->guardSystemRole($role);
         $role->update(['name' => $request->string('name')->toString()]);
-        $role->syncPermissions($this->allowedPermissions($request->input('permissions', [])));
+        $permissions = $this->allowedPermissions($request->input('permissions', []));
+        $role->syncPermissions($permissions);
         $this->forgetPermissionCache();
+
+        ActivityLogService::log(
+            'role.updated',
+            "Pengguna {$request->user()->name} memperbarui role {$role->name}.",
+            $role,
+            ['permissions' => $permissions]
+        );
 
         return redirect()->route('roles.index')->with('success', 'Role berhasil diperbarui.');
     }
@@ -71,6 +87,12 @@ class RoleController extends Controller
 
         $role->delete();
         $this->forgetPermissionCache();
+
+        ActivityLogService::log(
+            'role.deleted',
+            'Pengguna '.request()->user()->name." menghapus role {$role->name}.",
+            $role
+        );
 
         return redirect()->route('roles.index')->with('success', 'Role berhasil dihapus.');
     }

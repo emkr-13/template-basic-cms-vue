@@ -1,10 +1,36 @@
 services:
+  deploy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: >-
+      sh -c "php artisan migrate --force --no-interaction &&
+      php artisan config:cache --no-interaction &&
+      php artisan route:cache --no-interaction &&
+      php artisan view:cache --no-interaction"
+    env_file:
+      - .env.prod
+    volumes:
+      - storage:/var/www/html/storage
+    restart: "no"
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     env_file:
       - .env.prod
+    depends_on:
+      deploy:
+        condition: service_completed_successfully
+    volumes:
+      - storage:/var/www/html/storage
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm -t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
 
   queue:
@@ -15,7 +41,24 @@ services:
     env_file:
       - .env.prod
     depends_on:
-      - app
+      deploy:
+        condition: service_completed_successfully
+    volumes:
+      - storage:/var/www/html/storage
+    restart: unless-stopped
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: php artisan schedule:work
+    env_file:
+      - .env.prod
+    depends_on:
+      deploy:
+        condition: service_completed_successfully
+    volumes:
+      - storage:/var/www/html/storage
     restart: unless-stopped
 
   web:
@@ -23,9 +66,18 @@ services:
       context: .
       dockerfile: Dockerfile.web
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     ports:
       - "8080:80"
+    volumes:
+      - storage:/var/www/html/storage:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost/up || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
 
   # Optional Redis Service for High-Throughput Production Setup
@@ -36,3 +88,5 @@ services:
   #   ports:
   #     - "6379:6379"
 
+volumes:
+  storage:

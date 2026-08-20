@@ -4,7 +4,7 @@
 <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 13"></a>
 <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue.js-3.x-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
 <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia.js-v3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia v3"></a>
-<a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"></a>
+<a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"></a>
 <a href="https://docker.com"><img src="https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"></a>
 </p>
 
@@ -38,7 +38,7 @@ Template starter-kit CMS profesional berbasis **Laravel 13**, **Inertia.js v3**,
 ## ✨ Fitur Utama
 
 - **Architecture**: Laravel 13 (PHP 8.3) + Inertia.js v3 SPA tanpa kompleksitas API terpisah.
-- **Frontend Stack**: Vue 3 (`<script setup>`), Vite, Tailwind CSS, Ziggy Route helper.
+- **Frontend Stack**: Vue 3 (`<script setup>`), Vite, dan Tailwind CSS v4.
 - **Role & Permission Management**: Integrasi Spatie `laravel-permission` (Roles, Permissions, & `super_admin` bypass).
 - **API Proof of Concept**: Public/Private API versioned, Sanctum Bearer Token 1 jam, API credential Super Admin, dan Swagger/OpenAPI.
 - **Data Export & Import**: Siap pakai dengan `maatwebsite/excel` (Excel/CSV) & `barryvdh/laravel-dompdf` (PDF Export).
@@ -141,7 +141,10 @@ docker compose -f compose.dev.yaml up -d --build
 # 2. Jalankan migrasi database & Inisialisasi Role
 docker compose -f compose.dev.yaml exec app php artisan migrate
 
-# 3. Inisialisasi permissions, role, & buat akun Super Admin
+# 3. Buat symlink upload publik untuk avatar/file public
+docker compose -f compose.dev.yaml exec app php artisan storage:link
+
+# 4. Inisialisasi permissions, role, & buat akun Super Admin
 docker compose -f compose.dev.yaml exec app php artisan role:init
 ```
 *(Atau gunakan opsi `--name`, `--email`, `--password` untuk eksekusi non-interaktif)*
@@ -275,7 +278,7 @@ Gunakan perintah Artisan `test` di dalam container Docker development:
 docker compose -f compose.dev.yaml exec app php artisan test
 
 # 2. Jalankan test pada file tertentu
-docker compose -f compose.dev.yaml exec app php artisan test tests/Feature/Console/MakeSuperAdminCommandTest.php
+docker compose -f compose.dev.yaml exec app php artisan test tests/Feature/UserControllerTest.php
 
 # 3. Filter pengujian berdasarkan nama method / class
 docker compose -f compose.dev.yaml exec app php artisan test --filter=MakeSuperAdmin
@@ -299,6 +302,8 @@ cp .env.prod.example .env.prod
 ```
 Isi `APP_KEY`, domain production, serta kredensial database production.
 
+> Production menggunakan database eksternal. Tetap jalankan Vite di host hanya untuk development; asset production dibangun ke image Docker.
+
 ### 2. Pengaturan Mailer SMTP
 Pastikan `MAIL_MAILER=smtp` beserta kredensial SMTP diisi dengan benar agar sistem dapat mengirimkan email undangan user dan reset password.
 
@@ -309,7 +314,9 @@ docker compose -f compose.prod.yaml exec app php artisan make:super-admin
 ```
 - Aplikasi production tersedia di **`http://localhost:8080`** (atau via reverse proxy Nginx/Traefik).
 - Asset Vue/CSS sudah otomatis di-build di dalam image production (tidak memerlukan `npm run dev`).
-- Container otomatis menjalankan `php artisan migrate --force --no-interaction` saat startup.
+- Service `deploy` menjalankan migration dan cache satu kali sebelum service runtime aktif; restart worker tidak mengulangi migration.
+- Volume `storage` dibagikan ke PHP-FPM, queue, scheduler, dan Nginx agar upload lokal tidak hilang saat container diganti.
+- Swagger hanya dapat diakses Super Admin saat `APP_ENV=production`.
 
 ---
 
@@ -323,7 +330,7 @@ docker compose -f compose.prod.yaml exec app php artisan make:super-admin
 | **Run Migration** | `docker compose -f compose.dev.yaml exec app php artisan migrate` |
 | **Init Roles & Super Admin** | `docker compose -f compose.dev.yaml exec app php artisan role:init` |
 | **Run All Tests** | `docker compose -f compose.dev.yaml exec app php artisan test` |
-| **Run Specific Test** | `docker compose -f compose.dev.yaml exec app php artisan test tests/Feature/Console/MakeSuperAdminCommandTest.php` |
+| **Run Specific Test** | `docker compose -f compose.dev.yaml exec app php artisan test tests/Feature/UserControllerTest.php` |
 | **Run Filtered Tests** | `docker compose -f compose.dev.yaml exec app php artisan test --filter=<Name>` |
 | **Run API POC Tests** | `docker compose -f compose.dev.yaml exec app php artisan test --compact tests/Feature/ApiCredentialApiTest.php` |
 | **Generate Swagger/OpenAPI** | `docker compose -f compose.dev.yaml exec app php artisan l5-swagger:generate` |
@@ -388,7 +395,7 @@ Gunakan alur 5 langkah standar berikut untuk menambahkan modul/fitur baru di CMS
    docker compose -f compose.dev.yaml exec app php artisan make:controller ProductController
    ```
 3. **Daftarkan Route & Permission**:
-   Tambahkan middleware `permission:product.view` pada `routes/web.php` dan daftarkan permission baru di `RoleAndPermissionSeeder.php`.
+   Tambahkan middleware `permission:product.view` pada `routes/web.php` dan daftarkan permission baru di `app/Enums/PermissionEnum.php` agar `role:init` membuatnya secara idempoten.
 4. **Buat Halaman Vue di `resources/js/Pages/Products/`**:
    Bungkus halaman dengan `<AuthenticatedLayout title="Products">` dan gunakan komponen reusable (`Card`, `TextInput`, `SearchFilterBar`, `StatusBadge`).
 5. **Buat Feature Test & Jalankan Format Code**:
@@ -402,5 +409,4 @@ Gunakan alur 5 langkah standar berikut untuk menambahkan modul/fitur baru di CMS
 
 ## 📄 Lisensi
 
-Proyek ini menggunakan lisensi open-source [MIT License](LICENSE).
-
+Tambahkan lisensi proyek yang dipilih sebelum template didistribusikan ke publik.

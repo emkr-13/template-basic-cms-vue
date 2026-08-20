@@ -8,6 +8,7 @@ use App\Exports\UsersExport;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
+use App\Services\ActivityLogService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -58,6 +59,13 @@ class UserController extends Controller
             return $user;
         });
 
+        ActivityLogService::log(
+            'user.created',
+            "Pengguna {$request->user()->name} membuat akun {$user->email}.",
+            $user,
+            ['credential_delivery' => $data['credential_delivery'], 'role' => $data['role'] ?? null]
+        );
+
         if ($isInvitation) {
             $status = Password::sendResetLink(['email' => $user->email]);
 
@@ -96,6 +104,13 @@ class UserController extends Controller
             $user->syncRoles([]);
         }
 
+        ActivityLogService::log(
+            'user.updated',
+            "Pengguna {$request->user()->name} memperbarui akun {$user->email}.",
+            $user,
+            ['status' => $user->status->value, 'role' => $targetRole]
+        );
+
         return redirect()->route('users.index')->with('success', 'User berhasil diperbarui.');
     }
 
@@ -105,6 +120,12 @@ class UserController extends Controller
         abort_if($user->is(request()->user()), 422, 'Anda tidak dapat menghapus akun sendiri.');
         $this->guardLastSuperAdmin($user, null);
         $user->delete();
+
+        ActivityLogService::log(
+            'user.deleted',
+            'Pengguna '.request()->user()->name." menghapus akun {$user->email}.",
+            $user
+        );
 
         return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
     }

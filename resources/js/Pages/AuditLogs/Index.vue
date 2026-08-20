@@ -16,7 +16,7 @@ const search = ref(props.filters.search || '');
 
 watch(search, (val) => {
     router.get(
-        route('audit-logs.index'),
+        '/audit-logs',
         { search: val },
         { preserveState: true, replace: true }
     );

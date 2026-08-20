@@ -1,10 +1,7 @@
 #!/bin/sh
 set -e
 
-php artisan migrate --force --no-interaction
-php artisan config:cache --no-interaction
-php artisan route:cache --no-interaction
-php artisan view:cache --no-interaction
+mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
+chown -R www-data:www-data storage bootstrap/cache
 
 exec "$@"
-

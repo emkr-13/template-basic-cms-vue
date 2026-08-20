@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreApiCredentialRequest;
 use App\Models\ApiCredential;
+use App\Services\ActivityLogService;
 use App\Services\ApiTokenService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
@@ -38,12 +39,26 @@ class ApiCredentialController extends Controller
             'created_by' => $request->user()->id,
         ]);
 
+        ActivityLogService::log(
+            'api_credential.created',
+            "Pengguna {$request->user()->name} membuat API credential {$credential->name}.",
+            $credential,
+            ['client_id' => $credential->client_id]
+        );
+
         return redirect()->route('api-credentials.index')->with('apiCredential', ['name' => $credential->name, 'client_id' => $credential->client_id, 'client_secret' => $secret]);
     }
 
     public function destroy(ApiCredential $apiCredential): RedirectResponse
     {
         $this->apiTokenService->revoke($apiCredential);
+
+        ActivityLogService::log(
+            'api_credential.revoked',
+            'Pengguna '.request()->user()->name." merevoke API credential {$apiCredential->name}.",
+            $apiCredential,
+            ['client_id' => $apiCredential->client_id]
+        );
 
         return redirect()->route('api-credentials.index')->with('success', 'API credential berhasil direvoke.');
     }

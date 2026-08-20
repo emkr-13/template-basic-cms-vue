@@ -30,7 +30,7 @@ function handleAvatarChange(e) {
 }
 
 function submitProfile() {
-    form.post(route('profile.update'), {
+    form.post('/profile', {
         preserveScroll: true,
         onSuccess: () => {
             avatarPreview.value = null;
@@ -41,7 +41,7 @@ function submitProfile() {
 
 function removeAvatar() {
     if (confirm('Apakah Anda yakin ingin menghapus foto profil?')) {
-        router.delete(route('profile.avatar.destroy'), {
+        router.delete('/profile/avatar', {
             preserveScroll: true,
             onSuccess: () => {
                 avatarPreview.value = null;

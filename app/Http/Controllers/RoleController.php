@@ -82,7 +82,7 @@ class RoleController extends Controller
     /** @param array<int, string> $permissions */
     private function allowedPermissions(array $permissions): array
     {
-        $requested = array_values(array_unique($permissions));
+        $requested = PermissionEnum::resolveDependencies(array_values(array_unique($permissions)));
         $user = request()->user();
 
         if ($user->hasRole(RoleEnum::SUPER_ADMIN->value)) {
@@ -107,7 +107,11 @@ class RoleController extends Controller
             ->groupBy(fn (PermissionEnum $permission): string => $permission->module())
             ->map(fn ($permissions, string $module): array => [
                 'name' => $module,
-                'permissions' => $permissions->map(fn (PermissionEnum $permission): array => ['name' => $permission->value, 'label' => $permission->label()])->values()->all(),
+                'permissions' => $permissions->map(fn (PermissionEnum $permission): array => [
+                    'name' => $permission->value,
+                    'label' => $permission->label(),
+                    'description' => $permission->description(),
+                ])->values()->all(),
             ])->values()->all();
     }
 

@@ -12,9 +12,9 @@ RUN npm run build
 
 FROM php:8.3-fpm-alpine AS php-base
 
-RUN apk add --no-cache libzip-dev libpng-dev libjpeg-turbo-dev freetype-dev \
+RUN apk add --no-cache libzip-dev libpng-dev libjpeg-turbo-dev freetype-dev sqlite-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo_mysql zip
+    && docker-php-ext-install gd pdo_mysql pdo_sqlite zip
 
 FROM php-base AS vendor
 

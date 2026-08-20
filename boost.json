@@ -1,0 +1,26 @@
+{
+    "agents": [
+        "antigravity",
+        "codex",
+        "opencode",
+        "copilot",
+        "kiro"
+    ],
+    "cloud": false,
+    "guidelines": true,
+    "mcp": true,
+    "nightwatch": false,
+    "packages": [
+        "maatwebsite/excel",
+        "spatie/laravel-permission"
+    ],
+    "sail": false,
+    "skills": [
+        "infer-conventions",
+        "laravel-best-practices",
+        "inertia-vue-development",
+        "tailwindcss-development",
+        "laravel-excel",
+        "laravel-permission-development"
+    ]
+}

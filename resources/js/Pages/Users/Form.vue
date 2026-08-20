@@ -92,14 +92,14 @@ const submit = () => {
                             :error="form.errors.email"
                         />
 
-                        <!-- Role Select Input -->
+                        <!-- Role Select Input (Optional) -->
                         <SelectInput
                             v-model="form.role"
-                            label="Assigned Role"
-                            required
-                            placeholder="Select a role..."
+                            label="Assigned Role (Optional)"
+                            placeholder="No Role (Without Role)"
                             :error="form.errors.role"
                         >
+                            <option value="">No Role (Without Role)</option>
                             <option v-for="roleItem in roles" :key="roleItem.id" :value="roleItem.name">
                                 {{ roleItem.name }}
                             </option>

@@ -49,7 +49,11 @@ class UserController extends Controller
                 'must_change_password' => ! $isInvitation,
                 'invited_at' => $isInvitation ? now() : null,
             ]);
-            $user->syncRoles([$this->validatedAssignableRole($data['role'])]);
+            if (! empty($data['role'])) {
+                $user->syncRoles([$this->validatedAssignableRole($data['role'])]);
+            } else {
+                $user->syncRoles([]);
+            }
 
             return $user;
         });
@@ -82,10 +86,15 @@ class UserController extends Controller
         $this->guardUserManagement($user);
         abort_if($user->is($request->user()), 422, 'Anda tidak dapat mengubah akun sendiri melalui User Management.');
         $data = $request->validated();
-        $this->guardLastSuperAdmin($user, $data['role']);
+        $targetRole = ! empty($data['role']) ? $data['role'] : null;
+        $this->guardLastSuperAdmin($user, $targetRole);
 
         $user->update(['name' => $data['name'], 'email' => $data['email'], 'status' => $data['status']]);
-        $user->syncRoles([$this->validatedAssignableRole($data['role'])]);
+        if ($targetRole) {
+            $user->syncRoles([$this->validatedAssignableRole($targetRole)]);
+        } else {
+            $user->syncRoles([]);
+        }
 
         return redirect()->route('users.index')->with('success', 'User berhasil diperbarui.');
     }
@@ -162,8 +171,12 @@ class UserController extends Controller
             })->map(fn (Role $role): array => ['id' => $role->id, 'name' => $role->name])->values()->all();
     }
 
-    private function validatedAssignableRole(string $roleName): string
+    private function validatedAssignableRole(?string $roleName): ?string
     {
+        if (empty($roleName)) {
+            return null;
+        }
+
         abort_unless(collect($this->assignableRoles())->contains('name', $roleName), 403);
 
         return $roleName;

@@ -13,7 +13,7 @@ class UpdateUserRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->route('user'))],
-            'role' => ['required', 'string', 'exists:roles,name'],
+            'role' => ['nullable', 'string', 'exists:roles,name'],
             'status' => ['required', Rule::enum(UserStatusEnum::class)],
         ];
     }

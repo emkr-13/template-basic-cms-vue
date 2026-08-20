@@ -90,6 +90,29 @@ class UserControllerTest extends TestCase
         $this->actingAs($managerUser)->delete(route('users.destroy', $superAdminUser))->assertStatus(403);
     }
 
+    public function test_non_super_admin_cannot_see_super_admin_users_in_user_list(): void
+    {
+        $superAdminUser = User::factory()->create(['name' => 'Secret SuperAdmin']);
+        $superAdminUser->assignRole(RoleEnum::SUPER_ADMIN->value);
+
+        $managerRole = Role::create(['name' => 'manager', 'guard_name' => 'web']);
+        $managerRole->givePermissionTo(PermissionEnum::USER_VIEW->value);
+
+        $managerUser = User::factory()->create(['name' => 'Regular Manager']);
+        $managerUser->assignRole($managerRole);
+
+        $regularUser = User::factory()->create(['name' => 'Regular User']);
+
+        $response = $this->actingAs($managerUser)->get(route('users.index'));
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Users/Index')
+            ->has('users.data', 2)
+            ->where('users.data.0.name', 'Regular User')
+            ->where('users.data.1.name', 'Regular Manager')
+        );
+    }
+
     public function test_user_cannot_update_or_delete_self_via_user_management(): void
     {
         $superAdmin = User::factory()->create();

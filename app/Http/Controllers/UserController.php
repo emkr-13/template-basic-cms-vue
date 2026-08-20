@@ -123,10 +123,21 @@ class UserController extends Controller
 
     private function usersQuery(Request $request)
     {
-        return User::query()->with('roles.permissions')->when($request->string('search')->isNotEmpty(), function ($query) use ($request): void {
-            $search = $request->string('search')->toString();
-            $query->where(fn ($users) => $users->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"));
-        })->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))->latest();
+        $actor = $request->user();
+
+        return User::query()
+            ->with('roles.permissions')
+            ->when(! $actor?->hasRole(RoleEnum::SUPER_ADMIN->value), function ($query): void {
+                $query->whereDoesntHave('roles', function ($q): void {
+                    $q->where('name', RoleEnum::SUPER_ADMIN->value);
+                });
+            })
+            ->when($request->string('search')->isNotEmpty(), function ($query) use ($request): void {
+                $search = $request->string('search')->toString();
+                $query->where(fn ($users) => $users->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"));
+            })
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
+            ->latest();
     }
 
     private function userData(User $user): array

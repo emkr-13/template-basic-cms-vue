@@ -137,7 +137,7 @@ class UserController extends Controller
                 $query->where(fn ($users) => $users->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"));
             })
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
-            ->latest();
+            ->latest('id');
     }
 
     private function userData(User $user): array

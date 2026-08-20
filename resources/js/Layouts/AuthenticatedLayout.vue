@@ -128,6 +128,22 @@ function isActive(path) {
                             <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.657 1.343-3 3-3s3 1.343 3 3c0 1.105-.597 2.07-1.486 2.59L12 18l-4.514-4.41A2.99 2.99 0 016 11c0-1.657 1.343-3 3-3s3 1.343 3 3z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 20l16-16" /></svg>
                             <span>API Credentials</span>
                         </Link>
+
+                        <Link
+                            v-if="user?.isSuperAdmin"
+                            href="/audit-logs"
+                            :class="[
+                                'relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all',
+                                isActive('/audit-logs')
+                                    ? 'bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-600/15 dark:text-indigo-400 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-indigo-600 before:rounded-r'
+                                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-white'
+                            ]"
+                        >
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <span>Activity Monitor</span>
+                        </Link>
                     </nav>
                 </div>
             </div>
@@ -136,9 +152,11 @@ function isActive(path) {
             <div class="border-t border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800/80 dark:bg-slate-950/40">
                 <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 space-y-3">
                     <div class="flex items-center gap-2.5">
-                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 font-bold text-white text-sm">
-                            {{ user?.name ? user.name.charAt(0).toUpperCase() : 'U' }}
-                        </div>
+                        <img
+                            :src="user?.avatar_url"
+                            :alt="user?.name"
+                            class="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-indigo-500/20"
+                        />
                         <div class="min-w-0 flex-1">
                             <div class="truncate text-xs font-semibold text-slate-900 dark:text-white">{{ user?.name }}</div>
                             <div class="truncate text-[10px] text-slate-500 dark:text-slate-400 font-mono">{{ user?.email }}</div>
@@ -146,6 +164,21 @@ function isActive(path) {
                     </div>
 
                     <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-1.5">
+                        <Link
+                            href="/profile"
+                            :class="[
+                                'flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors',
+                                isActive('/profile') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-600/10 dark:text-indigo-400' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+                            ]"
+                        >
+                            <span class="flex items-center gap-2">
+                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>Profil Saya</span>
+                            </span>
+                        </Link>
+
                         <Link
                             href="/change-password"
                             :class="[
@@ -158,7 +191,7 @@ function isActive(path) {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span>Account Settings</span>
+                                <span>Ganti Password</span>
                             </span>
                         </Link>
 

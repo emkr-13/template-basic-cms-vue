@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Enums\UserStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Services\ActivityLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +35,12 @@ class AuthenticatedSessionController extends Controller
             return back()->withErrors(['email' => 'Akun ini tidak aktif.']);
         }
 
+        ActivityLogService::log(
+            'auth.login',
+            "Pengguna {$request->user()->name} berhasil login ke dalam sistem.",
+            $request->user()
+        );
+
         return redirect()->intended($request->user()->must_change_password
             ? route('password.change.edit')
             : route('dashboard'));
@@ -41,6 +48,15 @@ class AuthenticatedSessionController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+        if ($user) {
+            ActivityLogService::log(
+                'auth.logout',
+                "Pengguna {$user->name} logout dari sistem.",
+                $user
+            );
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

@@ -334,6 +334,73 @@ docker compose -f compose.prod.yaml exec app php artisan make:super-admin
 
 ---
 
+## 📐 Arsitektur Database & ERD
+
+```mermaid
+erDiagram
+    USERS ||--o{ ACTIVITY_LOGS : "mencatat"
+    USERS ||--o{ API_CREDENTIALS : "memiliki"
+    USERS }|--|{ ROLES : "model_has_roles"
+    ROLES }|--|{ PERMISSIONS : "role_has_permissions"
+
+    USERS {
+        bigint id PK
+        string name
+        string email
+        string avatar
+        string status
+        boolean must_change_password
+        timestamp invited_at
+        timestamp deleted_at
+    }
+
+    ACTIVITY_LOGS {
+        bigint id PK
+        bigint user_id FK
+        string action
+        string description
+        string ip_address
+        timestamp created_at
+    }
+
+    API_CREDENTIALS {
+        bigint id PK
+        bigint user_id FK
+        string client_id
+        string name
+        timestamp revoked_at
+    }
+```
+
+---
+
+## 🛠️ Panduan Menambah Modul Baru (Developer Guide)
+
+Gunakan alur 5 langkah standar berikut untuk menambahkan modul/fitur baru di CMS ini secara konsisten:
+
+1. **Buat Migration & Model**:
+   ```bash
+   docker compose -f compose.dev.yaml exec app php artisan make:model Product -m
+   ```
+2. **Buat Form Request & Controller**:
+   ```bash
+   docker compose -f compose.dev.yaml exec app php artisan make:request StoreProductRequest
+   docker compose -f compose.dev.yaml exec app php artisan make:controller ProductController
+   ```
+3. **Daftarkan Route & Permission**:
+   Tambahkan middleware `permission:product.view` pada `routes/web.php` dan daftarkan permission baru di `RoleAndPermissionSeeder.php`.
+4. **Buat Halaman Vue di `resources/js/Pages/Products/`**:
+   Bungkus halaman dengan `<AuthenticatedLayout title="Products">` dan gunakan komponen reusable (`Card`, `TextInput`, `SearchFilterBar`, `StatusBadge`).
+5. **Buat Feature Test & Jalankan Format Code**:
+   ```bash
+   docker compose -f compose.dev.yaml exec app php artisan make:test ProductControllerTest
+   docker compose -f compose.dev.yaml exec app php artisan test --filter=ProductControllerTest
+   docker compose -f compose.dev.yaml exec app vendor/bin/pint
+   ```
+
+---
+
 ## 📄 Lisensi
 
 Proyek ini menggunakan lisensi open-source [MIT License](LICENSE).
+

@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\ApiCredentialController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +24,10 @@ Route::middleware(['auth', 'force.password.change'])->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/change-password', [PasswordController::class, 'editChangePassword'])->name('password.change.edit');
     Route::put('/change-password', [PasswordController::class, 'changePassword'])->name('password.change.update');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/avatar', [ProfileController::class, 'destroyAvatar'])->name('profile.avatar.destroy');
 
     Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:role.view')->name('roles.index');
     Route::get('/roles/create', [RoleController::class, 'create'])->middleware('permission:role.create')->name('roles.create');
@@ -43,5 +49,7 @@ Route::middleware(['auth', 'force.password.change'])->group(function (): void {
         Route::get('/api-credentials', [ApiCredentialController::class, 'index'])->name('api-credentials.index');
         Route::post('/api-credentials', [ApiCredentialController::class, 'store'])->name('api-credentials.store');
         Route::delete('/api-credentials/{apiCredential}', [ApiCredentialController::class, 'destroy'])->name('api-credentials.destroy');
+
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
     });
 });

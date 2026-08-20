@@ -7,6 +7,17 @@ services:
       - .env.prod
     restart: unless-stopped
 
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: php artisan queue:work --tries=3 --timeout=90
+    env_file:
+      - .env.prod
+    depends_on:
+      - app
+    restart: unless-stopped
+
   web:
     build:
       context: .
@@ -16,3 +27,12 @@ services:
     ports:
       - "8080:80"
     restart: unless-stopped
+
+  # Optional Redis Service for High-Throughput Production Setup
+  # Uncomment the redis service below and set QUEUE_CONNECTION=redis, CACHE_STORE=redis, SESSION_DRIVER=redis in .env.prod if needed.
+  # redis:
+  #   image: redis:7-alpine
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+

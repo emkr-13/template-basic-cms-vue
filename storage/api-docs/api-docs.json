@@ -1,0 +1,105 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "CMS Template API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/public/check": {
+            "get": {
+                "tags": [
+                    "Public"
+                ],
+                "operationId": "70a7ab69420811fc1986c4bb4dc923bc",
+                "responses": {
+                    "200": {
+                        "description": "Public API is working"
+                    }
+                }
+            }
+        },
+        "/api/v1/private/check": {
+            "get": {
+                "tags": [
+                    "Private"
+                ],
+                "operationId": "9ae03c13f0d2a352996ad9583be9e3c3",
+                "responses": {
+                    "200": {
+                        "description": "Private API is working"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/token": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "operationId": "f5790a000fd998132ef36bf2a6b9ed2b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "client_id",
+                                    "client_secret"
+                                ],
+                                "properties": {
+                                    "client_id": {
+                                        "type": "string"
+                                    },
+                                    "client_secret": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Temporary bearer token issued"
+                    },
+                    "422": {
+                        "description": "Invalid credential"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "Sanctum",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Public",
+            "description": "Endpoint tanpa autentikasi."
+        },
+        {
+            "name": "Private",
+            "description": "Endpoint dengan Sanctum Bearer Token."
+        },
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        }
+    ]
+}

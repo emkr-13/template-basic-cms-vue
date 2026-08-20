@@ -114,6 +114,20 @@ function isActive(path) {
                             </svg>
                             <span>Role Management</span>
                         </Link>
+
+                        <Link
+                            v-if="user?.isSuperAdmin"
+                            href="/api-credentials"
+                            :class="[
+                                'relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all',
+                                isActive('/api-credentials')
+                                    ? 'bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-600/15 dark:text-indigo-400 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-indigo-600 before:rounded-r'
+                                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-white'
+                            ]"
+                        >
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.657 1.343-3 3-3s3 1.343 3 3c0 1.105-.597 2.07-1.486 2.59L12 18l-4.514-4.41A2.99 2.99 0 016 11c0-1.657 1.343-3 3-3s3 1.343 3 3z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 20l16-16" /></svg>
+                            <span>API Credentials</span>
+                        </Link>
                     </nav>
                 </div>
             </div>
@@ -225,6 +239,19 @@ function isActive(path) {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
                             <span>Role Management</span>
+                        </Link>
+
+                        <Link
+                            v-if="user?.isSuperAdmin"
+                            href="/api-credentials"
+                            :class="[
+                                'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all',
+                                isActive('/api-credentials') ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/30' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+                            ]"
+                            @click="closeMobileMenu"
+                        >
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.657 1.343-3 3-3s3 1.343 3 3c0 1.105-.597 2.07-1.486 2.59L12 18l-4.514-4.41A2.99 2.99 0 016 11c0-1.657 1.343-3 3-3s3 1.343 3 3z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 20l16-16" /></svg>
+                            <span>API Credentials</span>
                         </Link>
 
                         <Link

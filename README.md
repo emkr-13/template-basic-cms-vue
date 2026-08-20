@@ -1,7 +1,7 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="350" alt="Laravel Logo"></a></p>
 
 <p align="center">
-<a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 12"></a>
+<a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 13"></a>
 <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue.js-3.x-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
 <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia.js-v3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia v3"></a>
 <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"></a>
@@ -10,9 +10,9 @@
 
 ---
 
-# 🚀 Starter Template CMS Vue (Laravel 12 + Inertia v3)
+# 🚀 Starter Template CMS Vue (Laravel 13 + Inertia v3)
 
-Template starter-kit CMS profesional berbasis **Laravel 12**, **Inertia.js v3**, dan **Vue 3 (Composition API)**. Didesain siap pakai untuk proyek enterprise dengan manajemen akses berbasis role (RBAC), fitur ekspor-impor data, Docker development & production setup, serta terintegrasi penuh dengan **Laravel Boost & Agentic AI Coding Tools**.
+Template starter-kit CMS profesional berbasis **Laravel 13**, **Inertia.js v3**, dan **Vue 3 (Composition API)**. Didesain siap pakai untuk proyek enterprise dengan manajemen akses berbasis role (RBAC), fitur ekspor-impor data, Docker development & production setup, serta terintegrasi penuh dengan **Laravel Boost & Agentic AI Coding Tools**.
 
 ---
 
@@ -20,6 +20,7 @@ Template starter-kit CMS profesional berbasis **Laravel 12**, **Inertia.js v3**,
 - [Fitur Utama](#-fitur-utama)
 - [Persyaratan Sistem](#-persyaratan-sistem)
 - [Development Setup (Docker)](#-development-setup-docker)
+- [API Proof of Concept & Swagger Documentation](#-api-proof-of-concept--swagger-documentation)
 - [Penggunaan & Fitur AI Agent (Laravel Boost)](#-penggunaan--fitur-ai-agent-laravel-boost)
   - [Instalasi Boost di Docker](#1-instalasi--instalasi-ulang-boost-di-docker)
   - [Konfigurasi MCP Server (`mcp.json`)](#2-konfigurasi-mcp-server-mcpjson)
@@ -36,12 +37,70 @@ Template starter-kit CMS profesional berbasis **Laravel 12**, **Inertia.js v3**,
 
 ## ✨ Fitur Utama
 
-- **Architecture**: Laravel 12 (PHP 8.3) + Inertia.js v3 SPA tanpa kompleksitas API terpisah.
+- **Architecture**: Laravel 13 (PHP 8.3) + Inertia.js v3 SPA tanpa kompleksitas API terpisah.
 - **Frontend Stack**: Vue 3 (`<script setup>`), Vite, Tailwind CSS, Ziggy Route helper.
 - **Role & Permission Management**: Integrasi Spatie `laravel-permission` (Roles, Permissions, & `super_admin` bypass).
+- **API Proof of Concept**: Public/Private API versioned, Sanctum Bearer Token 1 jam, API credential Super Admin, dan Swagger/OpenAPI.
 - **Data Export & Import**: Siap pakai dengan `maatwebsite/excel` (Excel/CSV) & `barryvdh/laravel-dompdf` (PDF Export).
 - **Isolated Docker Setup**: Containerization terpisah untuk Development (`compose.dev.yaml`) & Production (`compose.prod.yaml`). Database MySQL berjalan terpisah dari container.
 - **Agentic AI Native Ready**: Terintegrasi langsung dengan **Laravel Boost (MCP Server)**, rules terstruktur (`.ai/rules`), dan Agent Skills (`.agents/skills/`) untuk akselerasi coding berbasis AI (Antigravity, Cursor, Claude Code, Copilot).
+
+---
+
+## 🔌 API Proof of Concept & Swagger Documentation
+
+### 📚 Swagger UI API Documentation
+Dokumentasi interaktif Swagger UI dapat diakses di browser pada URL:
+👉 **[http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)**
+
+### 🌐 API Endpoints (v1)
+
+Base URL: `http://localhost:8000`
+
+| Method | Endpoint | Authentication | Keterangan |
+|---|---|---|---|
+| **GET** | `http://localhost:8000/api/v1/public/check` | Tidak perlu | Verifikasi Public API |
+| **POST** | `http://localhost:8000/api/v1/auth/token` | `client_id` + `client_secret` | Menerbitkan Sanctum Bearer Token (Berlaku 1 jam) |
+| **GET** | `http://localhost:8000/api/v1/private/check` | Header: `Bearer Token` | Verifikasi Private API |
+
+### 🔄 Flow Autentikasi API Step-by-Step
+
+1. **Buat Kredensial API**: Super Admin membuka menu **API Credentials** (`http://localhost:8000/api-credentials`) di CMS untuk membuat `client_id` dan `client_secret`.
+2. **Terbitkan Token (`POST /api/v1/auth/token`)**:
+   Kirim request dengan body JSON:
+   ```json
+   {
+     "client_id": "YOUR_CLIENT_ID",
+     "client_secret": "YOUR_CLIENT_SECRET"
+   }
+   ```
+   Response akan mengembalikan `access_token` (Sanctum Bearer Token yang berlaku selama 1 jam).
+3. **Gunakan Token pada Request Private**:
+   Sertakan token pada HTTP Header `Authorization`:
+   ```http
+   Authorization: Bearer <access_token_anda>
+   ```
+
+Super Admin dapat mencabut (*revoke*) credential kapan saja melalui CMS, yang secara otomatis membatalkan seluruh Bearer Token aktif terkait.
+
+### 🚀 Cara Inisialisasi & Regenerasi Swagger UI
+
+Setelah container development aktif, jalankan perintah berikut dari host machine:
+
+```bash
+# 1. Terapkan migration Sanctum dan API credential
+docker compose -f compose.dev.yaml exec app php artisan migrate
+
+# 2. Generate spesifikasi OpenAPI untuk Swagger UI
+docker compose -f compose.dev.yaml exec app php artisan l5-swagger:generate
+
+# 3. Jalankan test POC API
+docker compose -f compose.dev.yaml exec app php artisan test --compact tests/Feature/ApiCredentialApiTest.php
+```
+
+> 💡 **Catatan Regenerasi Swagger:** Setiap kali Anda menambahkan API endpoint baru atau memperbarui annotasi OpenAPI/Swagger pada controller, jalankan kembali perintah `docker compose -f compose.dev.yaml exec app php artisan l5-swagger:generate` agar dokumentasi Swagger UI (`storage/api-docs/api-docs.json`) diperbarui secara otomatis.
+
+Setelah spesifikasi OpenAPI digenerate, buka **[http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)** di browser. Dapatkan token dari endpoint `/api/v1/auth/token`, klik tombol **Authorize** di kanan atas Swagger UI, paste token tersebut, lalu jalankan Private API (`/api/v1/private/check`).
 
 ---
 
@@ -266,6 +325,8 @@ docker compose -f compose.prod.yaml exec app php artisan make:super-admin
 | **Run All Tests** | `docker compose -f compose.dev.yaml exec app php artisan test` |
 | **Run Specific Test** | `docker compose -f compose.dev.yaml exec app php artisan test tests/Feature/Console/MakeSuperAdminCommandTest.php` |
 | **Run Filtered Tests** | `docker compose -f compose.dev.yaml exec app php artisan test --filter=<Name>` |
+| **Run API POC Tests** | `docker compose -f compose.dev.yaml exec app php artisan test --compact tests/Feature/ApiCredentialApiTest.php` |
+| **Generate Swagger/OpenAPI** | `docker compose -f compose.dev.yaml exec app php artisan l5-swagger:generate` |
 | **Run Parallel Tests** | `docker compose -f compose.dev.yaml exec app php artisan test --parallel` |
 | **Format Code (Pint)** | `docker compose -f compose.dev.yaml exec app vendor/bin/pint` |
 | **Clear App Cache** | `docker compose -f compose.dev.yaml exec app php artisan optimize:clear` |

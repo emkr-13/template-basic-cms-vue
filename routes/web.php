@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiCredentialController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\RoleController;
@@ -37,4 +38,10 @@ Route::middleware(['auth', 'force.password.change'])->group(function (): void {
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('permission:user.delete')->name('users.destroy');
     Route::get('/users/export/pdf', [UserController::class, 'exportPdf'])->middleware('permission:user.export.pdf')->name('users.export.pdf');
     Route::get('/users/export/excel', [UserController::class, 'exportExcel'])->middleware('permission:user.export.excel')->name('users.export.excel');
+
+    Route::middleware('role:super_admin')->group(function (): void {
+        Route::get('/api-credentials', [ApiCredentialController::class, 'index'])->name('api-credentials.index');
+        Route::post('/api-credentials', [ApiCredentialController::class, 'store'])->name('api-credentials.store');
+        Route::delete('/api-credentials/{apiCredential}', [ApiCredentialController::class, 'destroy'])->name('api-credentials.destroy');
+    });
 });

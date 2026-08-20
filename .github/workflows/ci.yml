@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  quality-and-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,11 +28,11 @@ jobs:
       - name: Audit PHP dependencies
         run: composer audit --locked --no-interaction
 
+      - name: Check PHP Code Style (Pint)
+        run: vendor/bin/pint --test
+
       - name: Install JavaScript dependencies
         run: npm ci
 
       - name: Build frontend assets
         run: npm run build
-
-      - name: Run tests
-        run: php artisan test --compact

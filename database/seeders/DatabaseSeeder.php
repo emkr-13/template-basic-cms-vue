@@ -14,8 +14,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            RolePermissionSeeder::class,
-        ]);
+        // Permissions and Super Admin initialization are handled via: php artisan role:init
     }
 }

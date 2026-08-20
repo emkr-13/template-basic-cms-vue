@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Enums\PermissionEnum;
 use App\Enums\RoleEnum;
 use App\Models\User;
-use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -18,7 +17,11 @@ class RoleControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(RolePermissionSeeder::class);
+        $this->artisan('role:init', [
+            '--name' => 'Super Admin',
+            '--email' => 'admin@example.com',
+            '--password' => 'password123',
+        ]);
     }
 
     public function test_guest_cannot_access_role_routes(): void

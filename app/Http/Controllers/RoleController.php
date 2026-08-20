@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateRoleRequest;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -83,6 +84,11 @@ class RoleController extends Controller
     private function allowedPermissions(array $permissions): array
     {
         $requested = PermissionEnum::resolveDependencies(array_values(array_unique($permissions)));
+
+        foreach ($requested as $perm) {
+            Permission::findOrCreate($perm, 'web');
+        }
+
         $user = request()->user();
 
         if ($user->hasRole(RoleEnum::SUPER_ADMIN->value)) {

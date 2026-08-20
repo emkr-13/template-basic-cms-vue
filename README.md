@@ -79,21 +79,15 @@ DB_PASSWORD=
 # 1. Jalankan container di background
 docker compose -f compose.dev.yaml up -d --build
 
-# 2. Jalankan migrasi database
+# 2. Jalankan migrasi database & Inisialisasi Role
 docker compose -f compose.dev.yaml exec app php artisan migrate
 
-# 3. Seed data role dan permission awal
-docker compose -f compose.dev.yaml exec app php artisan db:seed
-```
-
-### 3. Buat Akun Super Admin
-Jalankan perintah interaktif berikut untuk membuat akun Super Admin:
-```bash
-docker compose -f compose.dev.yaml exec app php artisan make:super-admin
+# 3. Inisialisasi permissions, role, & buat akun Super Admin
+docker compose -f compose.dev.yaml exec app php artisan role:init
 ```
 *(Atau gunakan opsi `--name`, `--email`, `--password` untuk eksekusi non-interaktif)*
 
-### 4. Jalankan Frontend Vite (Host Machine)
+### 3. Jalankan Frontend Vite (Host Machine)
 Buka terminal baru di mesin local dan jalankan Vite dev server:
 ```bash
 npm install
@@ -268,8 +262,7 @@ docker compose -f compose.prod.yaml exec app php artisan make:super-admin
 | **Stop Dev Container** | `docker compose -f compose.dev.yaml down` |
 | **Exec Artisan** | `docker compose -f compose.dev.yaml exec app php artisan <command>` |
 | **Run Migration** | `docker compose -f compose.dev.yaml exec app php artisan migrate` |
-| **Run Seeder** | `docker compose -f compose.dev.yaml exec app php artisan db:seed` |
-| **Create Super Admin** | `docker compose -f compose.dev.yaml exec app php artisan make:super-admin` |
+| **Init Roles & Super Admin** | `docker compose -f compose.dev.yaml exec app php artisan role:init` |
 | **Run All Tests** | `docker compose -f compose.dev.yaml exec app php artisan test` |
 | **Run Specific Test** | `docker compose -f compose.dev.yaml exec app php artisan test tests/Feature/Console/MakeSuperAdminCommandTest.php` |
 | **Run Filtered Tests** | `docker compose -f compose.dev.yaml exec app php artisan test --filter=<Name>` |

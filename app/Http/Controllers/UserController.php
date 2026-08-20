@@ -123,7 +123,7 @@ class UserController extends Controller
 
     private function usersQuery(Request $request)
     {
-        return User::query()->with('roles')->when($request->string('search')->isNotEmpty(), function ($query) use ($request): void {
+        return User::query()->with('roles.permissions')->when($request->string('search')->isNotEmpty(), function ($query) use ($request): void {
             $search = $request->string('search')->toString();
             $query->where(fn ($users) => $users->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"));
         })->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))->latest();
@@ -136,7 +136,11 @@ class UserController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'status' => $user->status->value,
-            'roles' => $user->roles->pluck('name')->values(),
+            'roles' => $user->roles->map(fn (Role $role): array => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'permissions' => $role->permissions->pluck('name')->values()->all(),
+            ])->values()->all(),
             'created_at' => $user->created_at->format('d M Y H:i'),
         ];
     }

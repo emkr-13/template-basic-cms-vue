@@ -4,6 +4,7 @@ import { ref } from 'vue';
 import Card from '../../Components/Card.vue';
 import DangerButton from '../../Components/DangerButton.vue';
 import Pagination from '../../Components/Pagination.vue';
+import PopoverModal from '../../Components/PopoverModal.vue';
 import PrimaryButton from '../../Components/PrimaryButton.vue';
 import SearchFilterBar from '../../Components/SearchFilterBar.vue';
 import SecondaryButton from '../../Components/SecondaryButton.vue';
@@ -17,6 +18,9 @@ const props = defineProps({
 
 const search = ref(props.filters.search || '');
 const status = ref(props.filters.status || '');
+
+const isRoleModalOpen = ref(false);
+const selectedRole = ref(null);
 
 const user = usePage().props.auth.user;
 const can = permission => user?.isSuperAdmin || user?.permissions?.includes(permission);
@@ -42,6 +46,15 @@ const remove = item => {
         router.delete(`/users/${item.id}`);
     }
 };
+
+function openRoleModal(role) {
+    if (typeof role === 'string') {
+        selectedRole.value = { name: role, permissions: [] };
+    } else {
+        selectedRole.value = role;
+    }
+    isRoleModalOpen.value = true;
+}
 </script>
 
 <template>
@@ -115,9 +128,28 @@ const remove = item => {
                             </td>
                             <td class="px-4 py-3.5 text-slate-500 dark:text-slate-400 font-mono">{{ item.email }}</td>
                             <td class="px-4 py-3.5">
-                                <StatusBadge type="indigo">
-                                    {{ item.roles?.join(', ') || 'No Role' }}
-                                </StatusBadge>
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <template v-if="item.roles && item.roles.length">
+                                        <button
+                                            v-for="roleItem in item.roles"
+                                            :key="typeof roleItem === 'string' ? roleItem : roleItem.id || roleItem.name"
+                                            type="button"
+                                            class="group cursor-pointer text-left"
+                                            title="Click to view role details & permissions"
+                                            @click="openRoleModal(roleItem)"
+                                        >
+                                            <StatusBadge type="indigo">
+                                                <span class="font-medium group-hover:underline">
+                                                    {{ typeof roleItem === 'string' ? roleItem : roleItem.name }}
+                                                </span>
+                                                <svg class="h-3 w-3 text-indigo-400 opacity-80 group-hover:opacity-100 transition-opacity ml-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </StatusBadge>
+                                        </button>
+                                    </template>
+                                    <span v-else class="text-xs text-slate-400 dark:text-slate-500 font-mono">No Role</span>
+                                </div>
                             </td>
                             <td class="px-4 py-3.5">
                                 <StatusBadge :status="item.status" />
@@ -172,9 +204,24 @@ const remove = item => {
                     </div>
 
                     <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-200 dark:border-slate-800/80">
-                        <div>
+                        <div class="flex items-center gap-1.5">
                             <span class="text-slate-500">Role: </span>
-                            <span class="text-slate-800 dark:text-slate-300 font-medium">{{ item.roles?.join(', ') || 'No Role' }}</span>
+                            <template v-if="item.roles && item.roles.length">
+                                <button
+                                    v-for="roleItem in item.roles"
+                                    :key="typeof roleItem === 'string' ? roleItem : roleItem.id || roleItem.name"
+                                    type="button"
+                                    class="group cursor-pointer"
+                                    @click="openRoleModal(roleItem)"
+                                >
+                                    <StatusBadge type="indigo">
+                                        <span class="font-medium group-hover:underline">
+                                            {{ typeof roleItem === 'string' ? roleItem : roleItem.name }}
+                                        </span>
+                                    </StatusBadge>
+                                </button>
+                            </template>
+                            <span v-else class="text-slate-400 font-mono">No Role</span>
                         </div>
                         <div class="text-slate-400 dark:text-slate-500 text-[11px]">{{ item.created_at }}</div>
                     </div>
@@ -207,5 +254,70 @@ const remove = item => {
                 />
             </template>
         </Card>
+
+        <!-- Reusable Role Details Popover Modal -->
+        <PopoverModal
+            v-model:show="isRoleModalOpen"
+            :title="selectedRole ? `Role Details: ${selectedRole.name}` : 'Role Details'"
+            subtitle="System access control and assigned permissions summary."
+            max-width="max-w-lg"
+        >
+            <div v-if="selectedRole" class="space-y-5">
+                <!-- Role Header Badge Card -->
+                <div class="flex items-center gap-3.5 p-4 rounded-xl border border-indigo-100 bg-indigo-50/50 dark:border-indigo-900/30 dark:bg-indigo-950/20">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-bold text-slate-900 dark:text-white text-base capitalize">
+                            {{ selectedRole.name }}
+                        </div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">
+                            {{ selectedRole.name === 'super_admin' ? 'Full System Administrator Access' : 'Custom Role Access' }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Granted Permissions List -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Assigned Permissions
+                        </h4>
+                        <span class="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                            {{ selectedRole.name === 'super_admin' ? 'All Permissions' : `${selectedRole.permissions?.length || 0} permissions` }}
+                        </span>
+                    </div>
+
+                    <div v-if="selectedRole.name === 'super_admin'" class="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 text-xs text-amber-900 dark:border-amber-900/30 dark:bg-amber-950/30 dark:text-amber-300">
+                        <div class="font-semibold mb-1">Super Admin Role Privilege</div>
+                        Super Admin automatically possesses all system permissions across user management, role management, export, and configuration modules.
+                    </div>
+
+                    <div v-else-if="selectedRole.permissions && selectedRole.permissions.length" class="flex flex-wrap gap-1.5 max-h-52 overflow-y-auto p-1">
+                        <span
+                            v-for="perm in selectedRole.permissions"
+                            :key="perm"
+                            class="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-mono font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80"
+                        >
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            <span>{{ perm }}</span>
+                        </span>
+                    </div>
+
+                    <div v-else class="rounded-xl border border-slate-200 bg-slate-50 p-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-950/60">
+                        No specific permissions assigned to this role.
+                    </div>
+                </div>
+            </div>
+
+            <template #footer>
+                <SecondaryButton type="button" @click="isRoleModalOpen = false">
+                    Close
+                </SecondaryButton>
+            </template>
+        </PopoverModal>
     </AuthenticatedLayout>
 </template>

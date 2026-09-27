@@ -41,7 +41,7 @@ class ApiCredentialController extends Controller
 
         ActivityLogService::log(
             'api_credential.created',
-            "Pengguna {$request->user()->name} membuat API credential {$credential->name}.",
+            "User {$request->user()->name} created API credential {$credential->name}.",
             $credential,
             ['client_id' => $credential->client_id]
         );
@@ -55,11 +55,11 @@ class ApiCredentialController extends Controller
 
         ActivityLogService::log(
             'api_credential.revoked',
-            'Pengguna '.request()->user()->name." merevoke API credential {$apiCredential->name}.",
+            'User '.request()->user()->name." revoked API credential {$apiCredential->name}.",
             $apiCredential,
             ['client_id' => $apiCredential->client_id]
         );
 
-        return redirect()->route('api-credentials.index')->with('success', 'API credential berhasil direvoke.');
+        return redirect()->route('api-credentials.index')->with('success', 'API credential successfully revoked.');
     }
 }

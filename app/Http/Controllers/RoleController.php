@@ -41,12 +41,12 @@ class RoleController extends Controller
 
         ActivityLogService::log(
             'role.created',
-            "Pengguna {$request->user()->name} membuat role {$role->name}.",
+            "User {$request->user()->name} created role {$role->name}.",
             $role,
             ['permissions' => $permissions]
         );
 
-        return redirect()->route('roles.index')->with('success', 'Role berhasil dibuat.');
+        return redirect()->route('roles.index')->with('success', 'Role successfully created.');
     }
 
     public function edit(Role $role): Response
@@ -69,12 +69,12 @@ class RoleController extends Controller
 
         ActivityLogService::log(
             'role.updated',
-            "Pengguna {$request->user()->name} memperbarui role {$role->name}.",
+            "User {$request->user()->name} updated role {$role->name}.",
             $role,
             ['permissions' => $permissions]
         );
 
-        return redirect()->route('roles.index')->with('success', 'Role berhasil diperbarui.');
+        return redirect()->route('roles.index')->with('success', 'Role successfully updated.');
     }
 
     public function destroy(Role $role): RedirectResponse
@@ -82,7 +82,7 @@ class RoleController extends Controller
         $this->guardSystemRole($role);
 
         if ($role->users()->exists()) {
-            return back()->withErrors(['role' => 'Role yang masih digunakan user tidak dapat dihapus.']);
+            return back()->withErrors(['role' => 'Roles currently assigned to users cannot be deleted.']);
         }
 
         $role->delete();
@@ -90,11 +90,11 @@ class RoleController extends Controller
 
         ActivityLogService::log(
             'role.deleted',
-            'Pengguna '.request()->user()->name." menghapus role {$role->name}.",
+            'User '.request()->user()->name." deleted role {$role->name}.",
             $role
         );
 
-        return redirect()->route('roles.index')->with('success', 'Role berhasil dihapus.');
+        return redirect()->route('roles.index')->with('success', 'Role successfully deleted.');
     }
 
     private function guardSystemRole(Role $role): void

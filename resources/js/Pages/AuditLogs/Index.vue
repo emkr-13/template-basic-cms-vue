@@ -49,7 +49,7 @@ function getActionBadgeClass(action) {
                             Super Admin Only
                         </span>
                     </div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Audit trail real-time pencatatan aktivitas, login, dan perubahan data di dalam sistem.</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Real-time audit trail recording activity logs, logins, and system data changes.</p>
                 </div>
             </div>
 
@@ -58,7 +58,7 @@ function getActionBadgeClass(action) {
                 <!-- Card 1: Total Logs -->
                 <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between">
                     <div>
-                        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Audit Log</div>
+                        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Audit Logs</div>
                         <div class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ stats.total_logs }}</div>
                     </div>
                     <div class="h-11 w-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
@@ -71,7 +71,7 @@ function getActionBadgeClass(action) {
                 <!-- Card 2: Today Logs -->
                 <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between">
                     <div>
-                        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Aktivitas Hari Ini</div>
+                        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Today's Activity</div>
                         <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{{ stats.today_logs }}</div>
                     </div>
                     <div class="h-11 w-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
@@ -84,7 +84,7 @@ function getActionBadgeClass(action) {
                 <!-- Card 3: Unique Users -->
                 <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between">
                     <div>
-                        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">User Aktif</div>
+                        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Users</div>
                         <div class="text-2xl font-bold text-slate-900 dark:text-white mt-1">{{ stats.unique_users }}</div>
                     </div>
                     <div class="h-11 w-11 rounded-xl bg-blue-50 dark:bg-blue-950/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
@@ -97,7 +97,7 @@ function getActionBadgeClass(action) {
                 <!-- Card 4: Auth Events -->
                 <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between">
                     <div>
-                        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Event Autentikasi</div>
+                        <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Authentication Events</div>
                         <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">{{ stats.auth_logs }}</div>
                     </div>
                     <div class="h-11 w-11 rounded-xl bg-purple-50 dark:bg-purple-950/50 flex items-center justify-center text-purple-600 dark:text-purple-400">
@@ -113,18 +113,18 @@ function getActionBadgeClass(action) {
                 <div class="space-y-4">
                     <SearchFilterBar
                         v-model:search="search"
-                        placeholder="Cari kata kunci aksi, deskripsi, user, atau IP address..."
+                        search-placeholder="Search action, description, user, or IP address..."
                     />
 
                     <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-900/80 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                                 <tr>
-                                    <th class="px-4 py-3">Pengguna</th>
+                                    <th class="px-4 py-3">User</th>
                                     <th class="px-4 py-3">Event / Action</th>
-                                    <th class="px-4 py-3">Deskripsi Aktivitas</th>
+                                    <th class="px-4 py-3">Activity Description</th>
                                     <th class="px-4 py-3">IP Address</th>
-                                    <th class="px-4 py-3 text-right">Waktu</th>
+                                    <th class="px-4 py-3 text-right">Time</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 font-medium">
@@ -137,7 +137,7 @@ function getActionBadgeClass(action) {
                                                 <div class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">{{ log.user.email }}</div>
                                             </div>
                                         </div>
-                                        <div v-else class="text-xs text-slate-400 italic">Sistem / Anonym</div>
+                                        <div v-else class="text-xs text-slate-400 italic">System / Anonymous</div>
                                     </td>
 
                                     <td class="px-4 py-3 whitespace-nowrap">
@@ -162,7 +162,7 @@ function getActionBadgeClass(action) {
 
                                 <tr v-if="logs.data.length === 0">
                                     <td colspan="5" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400 text-sm">
-                                        Tidak ada data log aktivitas yang ditemukan.
+                                        No activity logs found.
                                     </td>
                                 </tr>
                             </tbody>

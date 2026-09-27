@@ -69,6 +69,6 @@ class PasswordController extends Controller
         $request->validate(['password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()]]);
         $request->user()->forceFill(['password' => Hash::make($request->string('password')->toString()), 'must_change_password' => false])->save();
 
-        return redirect()->route('dashboard')->with('success', 'Password berhasil diperbarui.');
+        return redirect()->route('dashboard')->with('success', 'Password successfully updated.');
     }
 }

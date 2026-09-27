@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use OpenApi\Attributes as OA;
 
-#[OA\Tag(name: 'Public', description: 'Endpoint tanpa autentikasi.')]
-#[OA\Tag(name: 'Private', description: 'Endpoint dengan Sanctum Bearer Token.')]
+#[OA\Tag(name: 'Public', description: 'Public unauthenticated endpoint.')]
+#[OA\Tag(name: 'Private', description: 'Private endpoint requiring Sanctum Bearer Token.')]
 class ApiCheckController extends Controller
 {
     #[OA\Get(path: '/api/v1/public/check', tags: ['Public'], responses: [new OA\Response(response: 200, description: 'Public API is working')])]

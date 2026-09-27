@@ -52,11 +52,11 @@ class ProfileController extends Controller
 
         ActivityLogService::log(
             'profile.updated',
-            "Pengguna {$user->name} memperbarui informasi profil.",
+            "User {$user->name} updated profile information.",
             $user
         );
 
-        return redirect()->route('profile.edit')->with('success', 'Profil berhasil diperbarui.');
+        return redirect()->route('profile.edit')->with('success', 'Profile successfully updated.');
     }
 
     public function destroyAvatar(Request $request): RedirectResponse
@@ -72,10 +72,10 @@ class ProfileController extends Controller
 
         ActivityLogService::log(
             'profile.avatar_deleted',
-            "Pengguna {$user->name} menghapus foto profil.",
+            "User {$user->name} deleted profile photo.",
             $user
         );
 
-        return redirect()->route('profile.edit')->with('success', 'Foto profil berhasil dihapus.');
+        return redirect()->route('profile.edit')->with('success', 'Profile photo successfully deleted.');
     }
 }

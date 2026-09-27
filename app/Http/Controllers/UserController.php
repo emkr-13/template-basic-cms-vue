@@ -61,7 +61,7 @@ class UserController extends Controller
 
         ActivityLogService::log(
             'user.created',
-            "Pengguna {$request->user()->name} membuat akun {$user->email}.",
+            "User {$request->user()->name} created account {$user->email}.",
             $user,
             ['credential_delivery' => $data['credential_delivery'], 'role' => $data['role'] ?? null]
         );
@@ -70,13 +70,13 @@ class UserController extends Controller
             $status = Password::sendResetLink(['email' => $user->email]);
 
             if ($status !== Password::RESET_LINK_SENT) {
-                return redirect()->route('users.edit', $user)->withErrors(['email' => 'User dibuat, tetapi email undangan gagal dikirim. Kirim ulang setelah mailer dikonfigurasi.']);
+                return redirect()->route('users.edit', $user)->withErrors(['email' => 'User created, but invitation email failed to send. Resend after mailer is configured.']);
             }
 
             $user->update(['invitation_sent_at' => now()]);
         }
 
-        return redirect()->route('users.index')->with('success', $isInvitation ? 'User dibuat dan undangan email dikirim.' : 'User berhasil dibuat.');
+        return redirect()->route('users.index')->with('success', $isInvitation ? 'User created and invitation email sent.' : 'User successfully created.');
     }
 
     public function edit(User $user): Response
@@ -92,7 +92,7 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
         $this->guardUserManagement($user);
-        abort_if($user->is($request->user()), 422, 'Anda tidak dapat mengubah akun sendiri melalui User Management.');
+        abort_if($user->is($request->user()), 422, 'You cannot edit your own account through User Management.');
         $data = $request->validated();
         $targetRole = ! empty($data['role']) ? $data['role'] : null;
         $this->guardLastSuperAdmin($user, $targetRole);
@@ -106,28 +106,28 @@ class UserController extends Controller
 
         ActivityLogService::log(
             'user.updated',
-            "Pengguna {$request->user()->name} memperbarui akun {$user->email}.",
+            "User {$request->user()->name} updated account {$user->email}.",
             $user,
             ['status' => $user->status->value, 'role' => $targetRole]
         );
 
-        return redirect()->route('users.index')->with('success', 'User berhasil diperbarui.');
+        return redirect()->route('users.index')->with('success', 'User successfully updated.');
     }
 
     public function destroy(User $user): RedirectResponse
     {
         $this->guardUserManagement($user);
-        abort_if($user->is(request()->user()), 422, 'Anda tidak dapat menghapus akun sendiri.');
+        abort_if($user->is(request()->user()), 422, 'You cannot delete your own account.');
         $this->guardLastSuperAdmin($user, null);
         $user->delete();
 
         ActivityLogService::log(
             'user.deleted',
-            'Pengguna '.request()->user()->name." menghapus akun {$user->email}.",
+            'User '.request()->user()->name." deleted account {$user->email}.",
             $user
         );
 
-        return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
+        return redirect()->route('users.index')->with('success', 'User successfully deleted.');
     }
 
     public function exportPdf(Request $request)
@@ -189,7 +189,7 @@ class UserController extends Controller
         }
 
         $superAdminRole = Role::findByName(RoleEnum::SUPER_ADMIN->value, 'web');
-        abort_if($superAdminRole->users()->count() <= 1, 422, 'Super Admin terakhir tidak dapat dihapus atau dipindahkan ke role lain.');
+        abort_if($superAdminRole->users()->count() <= 1, 422, 'The last Super Admin cannot be deleted or reassigned to another role.');
     }
 
     private function assignableRoles(): array

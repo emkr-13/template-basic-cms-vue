@@ -40,7 +40,7 @@ function submitProfile() {
 }
 
 function removeAvatar() {
-    if (confirm('Apakah Anda yakin ingin menghapus foto profil?')) {
+    if (confirm('Are you sure you want to remove your profile photo?')) {
         router.delete('/profile/avatar', {
             preserveScroll: true,
             onSuccess: () => {
@@ -53,9 +53,9 @@ function removeAvatar() {
 </script>
 
 <template>
-    <Head title="Profil Saya" />
+    <Head title="My Profile — CMS Template" />
 
-    <AuthenticatedLayout title="Profil Saya">
+    <AuthenticatedLayout title="My Profile">
         <div class="max-w-4xl mx-auto space-y-6">
             <!-- Flash Banner -->
             <div v-if="$page.props.flash?.success" class="p-4 rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-sm font-medium flex items-center gap-2 shadow-sm">
@@ -68,8 +68,8 @@ function removeAvatar() {
             <!-- Page Title -->
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Pengaturan Profil</h1>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Kelola informasi diri, foto profil, dan kredensial akun Anda.</p>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Profile Settings</h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your personal information, profile photo, and account credentials.</p>
                 </div>
             </div>
 
@@ -86,8 +86,8 @@ function removeAvatar() {
                         </div>
 
                         <div class="space-y-2">
-                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Foto Profil</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Format yang didukung: JPG, PNG, WEBP. Maksimal 2MB.</p>
+                            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Profile Photo</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Supported formats: JPG, PNG, WEBP. Maximum 2MB.</p>
 
                             <div class="flex flex-wrap gap-2 pt-1">
                                 <input
@@ -99,7 +99,7 @@ function removeAvatar() {
                                 />
 
                                 <SecondaryButton type="button" @click="$refs.avatarInput.click()">
-                                    Pilih Foto Baru
+                                    Choose New Photo
                                 </SecondaryButton>
 
                                 <button
@@ -108,7 +108,7 @@ function removeAvatar() {
                                     class="px-3 py-1.5 text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors"
                                     @click="removeAvatar"
                                 >
-                                    Hapus Foto
+                                    Remove Photo
                                 </button>
                             </div>
                             <div v-if="form.errors.avatar" class="text-xs text-red-500 font-medium">{{ form.errors.avatar }}</div>
@@ -117,27 +117,27 @@ function removeAvatar() {
 
                     <!-- Personal Information -->
                     <div class="space-y-4">
-                        <h3 class="text-base font-semibold text-slate-900 dark:text-white">Informasi Diri</h3>
+                        <h3 class="text-base font-semibold text-slate-900 dark:text-white">Personal Information</h3>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
                                 <TextInput
                                     v-model="form.name"
                                     type="text"
                                     required
-                                    placeholder="Masukkan nama lengkap"
+                                    placeholder="Enter full name"
                                 />
                                 <div v-if="form.errors.name" class="text-xs text-red-500 font-medium mt-1">{{ form.errors.name }}</div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Email</label>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
                                 <TextInput
                                     v-model="form.email"
                                     type="email"
                                     required
-                                    placeholder="nama@email.com"
+                                    placeholder="name@email.com"
                                 />
                                 <div v-if="form.errors.email" class="text-xs text-red-500 font-medium mt-1">{{ form.errors.email }}</div>
                             </div>
@@ -147,7 +147,7 @@ function removeAvatar() {
                     <!-- Submit Actions -->
                     <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                         <PrimaryButton type="submit" :disabled="form.processing">
-                            {{ form.processing ? 'Menyimpan...' : 'Simpan Perubahan' }}
+                            {{ form.processing ? 'Saving...' : 'Save Changes' }}
                         </PrimaryButton>
                     </div>
                 </form>

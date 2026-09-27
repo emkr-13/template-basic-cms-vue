@@ -24,7 +24,7 @@ class AuthenticatedSessionController extends Controller
         $credentials = $request->safe()->only(['email', 'password']);
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            return back()->withErrors(['email' => 'Email atau password tidak valid.'])->onlyInput('email');
+            return back()->withErrors(['email' => 'Invalid email or password.'])->onlyInput('email');
         }
 
         $request->session()->regenerate();
@@ -32,12 +32,12 @@ class AuthenticatedSessionController extends Controller
         if ($request->user()->status === UserStatusEnum::DISABLED) {
             Auth::logout();
 
-            return back()->withErrors(['email' => 'Akun ini tidak aktif.']);
+            return back()->withErrors(['email' => 'This account is inactive.']);
         }
 
         ActivityLogService::log(
             'auth.login',
-            "Pengguna {$request->user()->name} berhasil login ke dalam sistem.",
+            "User {$request->user()->name} successfully logged in to the system.",
             $request->user()
         );
 
@@ -52,7 +52,7 @@ class AuthenticatedSessionController extends Controller
         if ($user) {
             ActivityLogService::log(
                 'auth.logout',
-                "Pengguna {$user->name} logout dari sistem.",
+                "User {$user->name} logged out from the system.",
                 $user
             );
         }

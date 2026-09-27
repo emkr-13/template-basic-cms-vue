@@ -26,12 +26,14 @@ services:
     volumes:
       - storage:/var/www/html/storage
     healthcheck:
-      test: ["CMD-SHELL", "php-fpm -t"]
+      test: ["CMD", "php", "-r", "exit((int) ! @file_get_contents('http://127.0.0.1/up'));"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
     restart: unless-stopped
+    ports:
+      - "8080:80"
 
   queue:
     build:
@@ -59,25 +61,6 @@ services:
         condition: service_completed_successfully
     volumes:
       - storage:/var/www/html/storage
-    restart: unless-stopped
-
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile.web
-    depends_on:
-      app:
-        condition: service_healthy
-    ports:
-      - "8080:80"
-    volumes:
-      - storage:/var/www/html/storage:ro
-    healthcheck:
-      test: ["CMD-SHELL", "wget --spider -q http://localhost/up || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
     restart: unless-stopped
 
   # Optional Redis Service for High-Throughput Production Setup

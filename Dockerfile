@@ -10,11 +10,9 @@ COPY public ./public
 COPY vite.config.js ./
 RUN npm run build
 
-FROM php:8.3-fpm-alpine AS php-base
+FROM dunglas/frankenphp:php8.3-bookworm AS php-base
 
-RUN apk add --no-cache libzip-dev libpng-dev libjpeg-turbo-dev freetype-dev sqlite-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo_mysql pdo_sqlite zip
+RUN install-php-extensions gd pdo_mysql pdo_sqlite zip
 
 FROM php-base AS vendor
 
@@ -31,6 +29,7 @@ WORKDIR /var/www/html
 COPY . .
 COPY --from=vendor /app/vendor ./vendor
 COPY --from=frontend /app/public/build ./public/build
+COPY docker/Caddyfile /etc/caddy/Caddyfile
 COPY docker/production-entrypoint.sh /usr/local/bin/production-entrypoint
 
 RUN mkdir -p storage/app storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
@@ -38,4 +37,4 @@ RUN mkdir -p storage/app storage/framework/cache storage/framework/sessions stor
     && chown -R www-data:www-data storage bootstrap/cache
 
 ENTRYPOINT ["production-entrypoint"]
-CMD ["php-fpm"]
+CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]

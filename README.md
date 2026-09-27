@@ -46,7 +46,7 @@ Template starter-kit CMS profesional berbasis **Laravel 13**, **Inertia.js v3**,
 - **Flexible Local Environment**: Siap dijalankan langsung via **Laravel Herd** (`.test` domain, super cepat & tanpa overhead container) maupun **Docker** container (`compose.dev.yaml`).
 - **API Proof of Concept**: Public/Private API versioned, Sanctum Bearer Token 1 jam, API credential Super Admin, dan Swagger/OpenAPI.
 - **Data Export & Import**: Siap pakai dengan `maatwebsite/excel` (Excel/CSV) & `barryvdh/laravel-dompdf` (PDF Export).
-- **Isolated Production Docker**: Siap deploy ke VPS dengan Docker production setup (`compose.prod.yaml`) dan Nginx reverse proxy SSL.
+- **Isolated Production Docker**: Siap deploy ke VPS dengan FrankenPHP + Caddy di dalam container (`compose.prod.yaml`) dan Nginx host sebagai reverse proxy SSL.
 - **Agentic AI Native Ready**: Terintegrasi langsung dengan **Laravel Boost (MCP Server)**, rules terstruktur (`.ai/rules`), dan Agent Skills (`.agents/skills/`) untuk akselerasi coding berbasis AI (Antigravity, Cursor, Claude Code, Copilot).
 
 ---
@@ -458,7 +458,7 @@ docker compose -f compose.dev.yaml exec app php artisan test --coverage
 
 ## 🚢 Production Deployment (Panduan Lengkap VPS Kosong hingga HTTPS)
 
-Pada server production (seperti DigitalOcean, AWS, Linode, VPS Ubuntu 22.04/24.04), aplikasi dikonfigurasi menggunakan `compose.prod.yaml` dan file `.env.prod`.
+Pada server production (seperti DigitalOcean, AWS, Linode, VPS Ubuntu 22.04/24.04), aplikasi dikonfigurasi menggunakan `compose.prod.yaml` dan file `.env.prod`. Service `app` menjalankan FrankenPHP dalam classic mode dengan Caddyfile di `docker/Caddyfile`, sehingga tidak memerlukan container Nginx atau PHP-FPM terpisah. Nginx di host VPS tetap digunakan hanya sebagai reverse proxy dan terminasi SSL.
 
 ---
 
@@ -516,11 +516,13 @@ docker compose -f compose.prod.yaml exec app php artisan make:super-admin
 
 > **💡 Catatan Service Deploy:** Service `deploy` pada `compose.prod.yaml` secara otomatis memproses `php artisan migrate --force` dan caching (`config:cache`, `route:cache`, `view:cache`) setiap kali container production di-up/rebuild.
 
+> **💡 Catatan FrankenPHP:** Service `app` menerima request pada port `80` di dalam container dan dipetakan ke port `8080` host. Caddyfile mempertahankan batas upload 20 MB, header keamanan, dan akses file publik pada `/storage`.
+
 ---
 
-### 4. Konfigurasi Nginx Host & SSL HTTPS (Certbot)
+### 4. Konfigurasi Nginx Host sebagai Reverse Proxy & SSL HTTPS (Certbot)
 
-Aplikasi production berjalan di port `8080` di dalam Docker. Konfigurasikan Nginx di host machine sebagai **Reverse Proxy** dan pasang SSL HTTPS gratis via Certbot.
+Aplikasi production berjalan melalui FrankenPHP pada port `80` di dalam container dan tersedia pada port `8080` di host VPS. Konfigurasikan Nginx di host machine sebagai **reverse proxy** dan pasang SSL HTTPS gratis via Certbot.
 
 #### A. Buat Konfigurasi Block Nginx:
 ```bash

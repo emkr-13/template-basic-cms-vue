@@ -1,0 +1,26 @@
+{
+	auto_https off
+	frankenphp
+}
+
+:80 {
+	root * /var/www/html/public
+
+	request_body {
+		max_size 20MB
+	}
+
+	header {
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		X-XSS-Protection "1; mode=block"
+	}
+
+	@storage path /storage/*
+	handle @storage {
+		root * /var/www/html/storage/app/public
+		file_server
+	}
+
+	php_server
+}

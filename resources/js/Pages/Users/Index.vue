@@ -48,8 +48,6 @@ const clearFilter = () => {
     filter();
 };
 
-const isCurrentUser = item => item.id === user.id;
-
 const remove = item => {
     confirmModalState.value = {
         show: true,
@@ -181,21 +179,18 @@ function openRoleModal(role) {
                             </td>
                             <td class="px-4 py-3.5 text-slate-400 dark:text-slate-500">{{ item.created_at }}</td>
                             <td class="px-4 py-3.5 text-right font-medium">
-                                <template v-if="!isCurrentUser(item)">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <Link
-                                            v-if="can('user.update')"
-                                            :href="`/users/${item.id}/edit`"
-                                            class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
-                                        >
-                                            Edit
-                                        </Link>
-                                        <DangerButton v-if="can('user.delete')" @click="remove(item)">
-                                            Delete
-                                        </DangerButton>
-                                    </div>
-                                </template>
-                                <span v-else class="text-xs text-slate-400 dark:text-slate-600 font-mono">Current User</span>
+                                <div class="flex items-center justify-end gap-3">
+                                    <Link
+                                        v-if="can('user.update')"
+                                        :href="`/users/${item.id}/edit`"
+                                        class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+                                    >
+                                        Edit
+                                    </Link>
+                                    <DangerButton v-if="can('user.delete')" @click="remove(item)">
+                                        Delete
+                                    </DangerButton>
+                                </div>
                             </td>
                         </tr>
                         <tr v-if="!users.data.length">
@@ -251,7 +246,7 @@ function openRoleModal(role) {
                         <div class="text-slate-400 dark:text-slate-500 text-[11px]">{{ item.created_at }}</div>
                     </div>
 
-                    <div v-if="!isCurrentUser(item)" class="flex items-center justify-end gap-3 pt-2">
+                    <div class="flex items-center justify-end gap-3 pt-2">
                         <Link
                             v-if="can('user.update')"
                             :href="`/users/${item.id}/edit`"

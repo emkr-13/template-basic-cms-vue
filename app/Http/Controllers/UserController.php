@@ -82,6 +82,7 @@ class UserController extends Controller
     public function edit(User $user): Response
     {
         $this->guardUserManagement($user);
+        abort_if($user->is(request()->user()), 403, 'You cannot edit your own account through User Management.');
 
         return Inertia::render('Users/Form', [
             'user' => [...$this->userData($user), 'role' => $user->roles->first()?->name],
@@ -148,6 +149,7 @@ class UserController extends Controller
 
         return User::query()
             ->with('roles.permissions')
+            ->when($actor, fn ($query) => $query->where('id', '!=', $actor->id))
             ->when(! $actor?->hasRole(RoleEnum::SUPER_ADMIN->value), function ($query): void {
                 $query->whereDoesntHave('roles', function ($q): void {
                     $q->where('name', RoleEnum::SUPER_ADMIN->value);

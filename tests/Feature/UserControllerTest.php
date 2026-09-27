@@ -107,16 +107,35 @@ class UserControllerTest extends TestCase
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->component('Users/Index')
-            ->has('users.data', 2)
+            ->has('users.data', 1)
             ->where('users.data.0.name', 'Regular User')
-            ->where('users.data.1.name', 'Regular Manager')
         );
     }
 
-    public function test_user_cannot_update_or_delete_self_via_user_management(): void
+    public function test_currently_authenticated_user_is_excluded_from_user_list(): void
+    {
+        /** @var User $superAdmin */
+        $superAdmin = User::where('email', 'admin@example.com')->first();
+        $otherUser = User::factory()->create(['name' => 'Another User']);
+
+        $response = $this->actingAs($superAdmin)->get(route('users.index'));
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Users/Index')
+            ->has('users.data', 1)
+            ->where('users.data.0.name', 'Another User')
+            ->where('users.data.0.id', $otherUser->id)
+        );
+    }
+
+    public function test_user_cannot_update_or_delete_or_edit_self_via_user_management(): void
     {
         $superAdmin = User::factory()->create();
         $superAdmin->assignRole(RoleEnum::SUPER_ADMIN->value);
+
+        // Attempt self edit page
+        $editResponse = $this->actingAs($superAdmin)->get(route('users.edit', $superAdmin));
+        $editResponse->assertStatus(403);
 
         // Attempt self update
         $updateResponse = $this->actingAs($superAdmin)->put(route('users.update', $superAdmin), [

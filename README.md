@@ -5,6 +5,7 @@
 <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue.js-3.x-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
 <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia.js-v3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia v3"></a>
 <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"></a>
+<a href="https://herd.laravel.com"><img src="https://img.shields.io/badge/Laravel_Herd-Supported-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel Herd"></a>
 <a href="https://docker.com"><img src="https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"></a>
 </p>
 
@@ -12,23 +13,25 @@
 
 # 🚀 Starter Template CMS Vue (Laravel 13 + Inertia v3)
 
-Template starter-kit CMS profesional berbasis **Laravel 13**, **Inertia.js v3**, dan **Vue 3 (Composition API)**. Didesain siap pakai untuk proyek enterprise dengan manajemen akses berbasis role (RBAC), fitur ekspor-impor data, Docker development & production setup, serta terintegrasi penuh dengan **Laravel Boost & Agentic AI Coding Tools**.
+Template starter-kit CMS profesional berbasis **Laravel 13**, **Inertia.js v3**, dan **Vue 3 (Composition API)**. Didesain siap pakai untuk proyek enterprise dengan manajemen akses berbasis role (RBAC), fitur ekspor-impor data, dukungan lingkungan development fleksibel via **Laravel Herd** maupun **Docker**, serta terintegrasi penuh dengan **Laravel Boost & Agentic AI Coding Tools**.
 
 ---
 
 ## 📑 Daftar Isi
 - [Fitur Utama](#-fitur-utama)
 - [Persyaratan Sistem](#-persyaratan-sistem)
-- [Development Setup (Docker)](#-development-setup-docker)
+- [Development Setup (Opsi 1: Laravel Herd - Rekomendasi)](#-development-setup-opsi-1-laravel-herd---rekomendasi)
+  - [Troubleshooting Permission di Linux/macOS](#-troubleshooting-permission-linuxmacos)
+- [Development Setup (Opsi 2: Docker Development)](#-development-setup-opsi-2-docker-development)
 - [API Proof of Concept & Swagger Documentation](#-api-proof-of-concept--swagger-documentation)
 - [Penggunaan & Fitur AI Agent (Laravel Boost)](#-penggunaan--fitur-ai-agent-laravel-boost)
-  - [Instalasi Boost di Docker](#1-instalasi--instalasi-ulang-boost-di-docker)
+  - [Setup Boost (Herd vs Docker)](#1-instalasi--setup-boost)
   - [Konfigurasi MCP Server (`mcp.json`)](#2-konfigurasi-mcp-server-mcpjson)
   - [Pembaruan Guidelines AI (`artisan boost:update`)](#3-pembaruan-guidelines-ai-artisan-boostupdate)
 - [Testing Setup & Execution (.env.testing)](#-testing-setup--execution-envtesting)
   - [Persiapan File Environment Testing](#1-persiapan-file-environment-testing)
-  - [Strategi Database Testing (Senior QA & Backend Standard)](#2-strategi-database-testing-senior-qa--backend-standard)
-  - [Menjalankan Testing di Docker Container](#3-menjalankan-testing-di-docker-container)
+  - [Strategi Database Testing](#2-strategi-database-testing-senior-qa--backend-standard)
+  - [Menjalankan Testing (Herd vs Docker)](#3-menjalankan-testing)
 - [Production Deployment](#-production-deployment)
 - [Command Cheat Sheet](#-command-cheat-sheet)
 - [Lisensi](#-lisensi)
@@ -40,10 +43,28 @@ Template starter-kit CMS profesional berbasis **Laravel 13**, **Inertia.js v3**,
 - **Architecture**: Laravel 13 (PHP 8.3) + Inertia.js v3 SPA tanpa kompleksitas API terpisah.
 - **Frontend Stack**: Vue 3 (`<script setup>`), Vite, dan Tailwind CSS v4.
 - **Role & Permission Management**: Integrasi Spatie `laravel-permission` (Roles, Permissions, & `super_admin` bypass).
+- **Flexible Local Environment**: Siap dijalankan langsung via **Laravel Herd** (`.test` domain, super cepat & tanpa overhead container) maupun **Docker** container (`compose.dev.yaml`).
 - **API Proof of Concept**: Public/Private API versioned, Sanctum Bearer Token 1 jam, API credential Super Admin, dan Swagger/OpenAPI.
 - **Data Export & Import**: Siap pakai dengan `maatwebsite/excel` (Excel/CSV) & `barryvdh/laravel-dompdf` (PDF Export).
-- **Isolated Docker Setup**: Containerization terpisah untuk Development (`compose.dev.yaml`) & Production (`compose.prod.yaml`). Database MySQL berjalan terpisah dari container.
+- **Isolated Production Docker**: Siap deploy ke VPS dengan Docker production setup (`compose.prod.yaml`) dan Nginx reverse proxy SSL.
 - **Agentic AI Native Ready**: Terintegrasi langsung dengan **Laravel Boost (MCP Server)**, rules terstruktur (`.ai/rules`), dan Agent Skills (`.agents/skills/`) untuk akselerasi coding berbasis AI (Antigravity, Cursor, Claude Code, Copilot).
+
+---
+
+## ⚙️ Persyaratan Sistem
+
+Pilih salah satu lingkungan development yang Anda gunakan:
+
+### Opsi A: Laravel Herd (Rekomendasi - Tercepat & Paling Ringan)
+- **Laravel Herd** (macOS, Windows, atau Linux) dengan **PHP 8.3**
+- **Composer** (bawaan Herd)
+- **Node.js** `>= 18.x` & **NPM** (bawaan Herd / host)
+- **MySQL** `>= 8.0` (Herd Pro Services atau MySQL server lokal)
+
+### Opsi B: Docker Development
+- **Docker** & **Docker Compose**
+- **Node.js** `>= 18.x` & **NPM** (untuk frontend dev di host machine)
+- **MySQL** `>= 8.0` (berjalan di host lokal atau database server terpisah)
 
 ---
 
@@ -51,21 +72,24 @@ Template starter-kit CMS profesional berbasis **Laravel 13**, **Inertia.js v3**,
 
 ### 📚 Swagger UI API Documentation
 Dokumentasi interaktif Swagger UI dapat diakses di browser pada URL:
-👉 **[http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)**
+- **Laravel Herd**: 👉 **[https://template-basic-cms-vue.test/api/documentation](https://template-basic-cms-vue.test/api/documentation)**
+- **Docker**: 👉 **[http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)**
 
 ### 🌐 API Endpoints (v1)
 
-Base URL: `http://localhost:8000`
+Base URL:
+- **Herd**: `https://template-basic-cms-vue.test`
+- **Docker**: `http://localhost:8000`
 
 | Method | Endpoint | Authentication | Keterangan |
 |---|---|---|---|
-| **GET** | `http://localhost:8000/api/v1/public/check` | Tidak perlu | Verifikasi Public API |
-| **POST** | `http://localhost:8000/api/v1/auth/token` | `client_id` + `client_secret` | Menerbitkan Sanctum Bearer Token (Berlaku 1 jam) |
-| **GET** | `http://localhost:8000/api/v1/private/check` | Header: `Bearer Token` | Verifikasi Private API |
+| **GET** | `/api/v1/public/check` | Tidak perlu | Verifikasi Public API |
+| **POST** | `/api/v1/auth/token` | `client_id` + `client_secret` | Menerbitkan Sanctum Bearer Token (Berlaku 1 jam) |
+| **GET** | `/api/v1/private/check` | Header: `Bearer Token` | Verifikasi Private API |
 
 ### 🔄 Flow Autentikasi API Step-by-Step
 
-1. **Buat Kredensial API**: Super Admin membuka menu **API Credentials** (`http://localhost:8000/api-credentials`) di CMS untuk membuat `client_id` dan `client_secret`.
+1. **Buat Kredensial API**: Super Admin membuka menu **API Credentials** (`/api-credentials`) di CMS untuk membuat `client_id` dan `client_secret`.
 2. **Terbitkan Token (`POST /api/v1/auth/token`)**:
    Kirim request dengan body JSON:
    ```json
@@ -85,8 +109,19 @@ Super Admin dapat mencabut (*revoke*) credential kapan saja melalui CMS, yang se
 
 ### 🚀 Cara Inisialisasi & Regenerasi Swagger UI
 
-Setelah container development aktif, jalankan perintah berikut dari host machine:
+**Jika Menggunakan Laravel Herd:**
+```bash
+# 1. Terapkan migration Sanctum dan API credential
+php artisan migrate
 
+# 2. Generate spesifikasi OpenAPI untuk Swagger UI
+php artisan l5-swagger:generate
+
+# 3. Jalankan test POC API
+php artisan test --compact tests/Feature/ApiCredentialApiTest.php
+```
+
+**Jika Menggunakan Docker:**
 ```bash
 # 1. Terapkan migration Sanctum dan API credential
 docker compose -f compose.dev.yaml exec app php artisan migrate
@@ -98,23 +133,107 @@ docker compose -f compose.dev.yaml exec app php artisan l5-swagger:generate
 docker compose -f compose.dev.yaml exec app php artisan test --compact tests/Feature/ApiCredentialApiTest.php
 ```
 
-> 💡 **Catatan Regenerasi Swagger:** Setiap kali Anda menambahkan API endpoint baru atau memperbarui annotasi OpenAPI/Swagger pada controller, jalankan kembali perintah `docker compose -f compose.dev.yaml exec app php artisan l5-swagger:generate` agar dokumentasi Swagger UI (`storage/api-docs/api-docs.json`) diperbarui secara otomatis.
-
-Setelah spesifikasi OpenAPI digenerate, buka **[http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)** di browser. Dapatkan token dari endpoint `/api/v1/auth/token`, klik tombol **Authorize** di kanan atas Swagger UI, paste token tersebut, lalu jalankan Private API (`/api/v1/private/check`).
+> 💡 **Catatan Regenerasi Swagger:** Setiap kali Anda menambahkan API endpoint baru atau memperbarui annotasi OpenAPI/Swagger pada controller, jalankan kembali perintah `php artisan l5-swagger:generate` agar file dokumentasi Swagger UI (`storage/api-docs/api-docs.json`) diperbarui secara otomatis.
 
 ---
 
-## ⚙️ Persyaratan Sistem
+## ⚡ Development Setup (Opsi 1: Laravel Herd - Rekomendasi)
 
-- **Docker** & **Docker Compose**
-- **Node.js** `>= 18.x` & **NPM** (untuk frontend dev di host machine)
-- **MySQL** `>= 8.0` (berjalan di host local atau database server terpisah)
+Laravel Herd adalah opsi tercepat dan paling efisien untuk development lokal karena menjalankan PHP 8.3 & Nginx secara native tanpa overhead container.
+
+### 1. Link / Park Project di Laravel Herd
+Buka folder project di terminal, lalu link ke Herd:
+```bash
+cd /mnt/template/template-basic-cms-vue
+herd link template-basic-cms-vue
+```
+*Domain lokal Anda akan otomatis aktif di: **`https://template-basic-cms-vue.test`***
+
+### 2. Persiapan Database & File `.env`
+Buat database MySQL lokal:
+```bash
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS sample_template_cms_vue;"
+```
+
+Salin file `.env.example` ke `.env`:
+```bash
+cp .env.example .env
+```
+
+Pastikan konfigurasi `.env` sesuai dengan environment lokal Anda:
+```env
+APP_NAME="Starter Template CMS Vue"
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=https://template-basic-cms-vue.test
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sample_template_cms_vue
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### 3. Install Dependencies
+```bash
+# Install PHP dependencies
+composer install
+
+# Install Frontend dependencies
+npm install
+```
+
+### 4. Setup Application Key, Database, & Roles
+```bash
+# 1. Generate Application Key
+php artisan key:generate
+
+# 2. Jalankan migrasi database
+php artisan migrate
+
+# 3. Buat symlink storage upload publik
+php artisan storage:link
+
+# 4. Inisialisasi permissions, role, & akun Super Admin awal
+php artisan role:init
+```
+
+### 5. Jalankan Frontend Vite
+Buka terminal dan jalankan Vite dev server:
+```bash
+npm run dev
+```
+
+Akses aplikasi di browser: **`https://template-basic-cms-vue.test`** 🎉
 
 ---
 
-## 🛠️ Development Setup (Docker)
+### 🛡️ Troubleshooting Permission (Linux/macOS)
 
-Database berada di luar Docker container. Container Docker hanya menjalankan runtime PHP/Laravel.
+Jika Anda melihat error seperti:
+- `file_put_contents(...): Failed to open stream: Permission denied`
+- `Error: EACCES: permission denied, mkdir '...'`
+- `Unable to write file ...`
+
+Hal ini biasanya terjadi karena ada file/folder (misalnya di `storage/` atau `.agents/`) yang secara tidak sengaja terbuat oleh user `root` (karena pernah menjalankan perintah dengan `sudo`).
+
+**Solusi Perbaikan (Jalankan sekali di Terminal):**
+```bash
+# 1. Ubah seluruh kepemilikan file & folder project ke user Anda saat ini
+sudo chown -R $USER:$USER .
+
+# 2. Berikan izin baca/tulis untuk folder storage dan bootstrap cache
+chmod -R 775 storage bootstrap/cache
+```
+Setelah perintah ini dijalankan, Herd dan IDE Anda dapat membaca/menulis file tanpa kendala izin.
+
+---
+
+## 🐳 Development Setup (Opsi 2: Docker Development)
+
+Gunakan Docker jika Anda ingin runtime PHP/Laravel terisolasi di dalam container tanpa menginstal PHP langsung di host machine.
 
 ### 1. Persiapan Database & File `.env`
 Buat database MySQL di host machine:
@@ -170,9 +289,18 @@ docker compose -f compose.dev.yaml down
 
 Proyek ini telah dikonfigurasi agar AI Coding Agents (seperti **Antigravity**, **Cursor**, **Claude Code**, **Copilot**) dapat bekerja dengan sangat presisi dan memahami konvensi aplikasi secara otomatis.
 
-### 1. Instalasi & Instalasi Ulang Boost di Docker
+### 1. Instalasi & Setup Boost
 
-Jika perlu melakukan setup/reset Laravel Boost di Docker:
+**Jika Menggunakan Laravel Herd:**
+```bash
+# Install package composer Boost
+composer require laravel/boost --dev
+
+# Jalankan installer interaktif
+php artisan boost:install
+```
+
+**Jika Menggunakan Docker:**
 ```bash
 # Install package composer Boost
 docker compose -f compose.dev.yaml exec app composer require laravel/boost --dev
@@ -189,8 +317,24 @@ docker compose -f compose.dev.yaml exec app php artisan boost:install
 
 ### 2. Konfigurasi MCP Server (`mcp.json`)
 
-Agar AI Editor/Agent pada host machine dapat menggunakan tool MCP dari dalam container Docker, tambahkan konfigurasi berikut pada `mcp.json` editor Anda:
+Tambahkan konfigurasi berikut pada file `mcp.json` editor/AI Agent Anda:
 
+**Opsi A: Laravel Herd (Host Native)**
+```json
+{
+  "mcpServers": {
+    "laravel-boost": {
+      "command": "php",
+      "args": [
+        "artisan",
+        "boost:mcp"
+      ]
+    }
+  }
+}
+```
+
+**Opsi B: Docker Development**
 ```json
 {
   "mcpServers": {
@@ -211,13 +355,16 @@ Agar AI Editor/Agent pada host machine dapat menggunakan tool MCP dari dalam con
   }
 }
 ```
-*Flag `-i` wajib ada agar komunikasi `stdin`/`stdout` antara AI Agent di host dan container Docker berjalan lancar.*
+*Pada Docker, flag `-i` wajib ada agar komunikasi `stdin`/`stdout` antara AI Agent di host dan container Docker berjalan lancar.*
 
 ### 3. Pembaruan Guidelines AI (`artisan boost:update`)
 
 Ketika Anda menambahkan package baru, mengubah struktur folder, atau menambah aturan proyek:
 ```bash
-# Refresh AI guidelines & skills di repositori
+# Laravel Herd
+php artisan boost:update
+
+# Docker
 docker compose -f compose.dev.yaml exec app php artisan boost:update
 ```
 
@@ -269,10 +416,27 @@ Terdapat dua pendekatan strategi database untuk pengujian:
 - **State Isolation**: `CACHE_STORE=array`, `SESSION_DRIVER=array`, dan `QUEUE_CONNECTION=sync` untuk mencegah *leaking state* antar unit test.
 - **Mail Trap (`MAIL_MAILER=array`)**: Mencegah pengiriman email asli saat pengujian berjalan.
 
-### 4. Menjalankan Testing di Docker Container
+### 4. Menjalankan Testing
 
-Gunakan perintah Artisan `test` di dalam container Docker development:
+**Jika Menggunakan Laravel Herd (Host Native):**
+```bash
+# 1. Jalankan seluruh suite test (Unit & Feature)
+php artisan test
 
+# 2. Jalankan test pada file tertentu
+php artisan test tests/Feature/UserControllerTest.php
+
+# 3. Filter pengujian berdasarkan nama method / class
+php artisan test --filter=MakeSuperAdmin
+
+# 4. Jalankan test secara paralel untuk akselerasi eksekusi
+php artisan test --parallel
+
+# 5. Jalankan test dengan laporan code coverage (jika Xdebug/PCOV aktif)
+php artisan test --coverage
+```
+
+**Jika Menggunakan Docker Container:**
 ```bash
 # 1. Jalankan seluruh suite test (Unit & Feature)
 docker compose -f compose.dev.yaml exec app php artisan test
@@ -424,23 +588,24 @@ docker compose -f compose.prod.yaml up -d --remove-orphans
 
 ## 📋 Command Cheat Sheet
 
-| Kebutuhan | Perintah Terminal |
-|---|---|
-| **Start Dev Container** | `docker compose -f compose.dev.yaml up -d` |
-| **Stop Dev Container** | `docker compose -f compose.dev.yaml down` |
-| **Deploy Production (Build & Up)** | `docker compose -f compose.prod.yaml build && docker compose -f compose.prod.yaml up -d --remove-orphans` |
-| **Exec Artisan** | `docker compose -f compose.dev.yaml exec app php artisan <command>` |
-| **Run Migration** | `docker compose -f compose.dev.yaml exec app php artisan migrate` |
-| **Init Roles & Super Admin** | `docker compose -f compose.dev.yaml exec app php artisan role:init` |
-| **Run All Tests** | `docker compose -f compose.dev.yaml exec app php artisan test` |
-| **Run Specific Test** | `docker compose -f compose.dev.yaml exec app php artisan test tests/Feature/UserControllerTest.php` |
-| **Run Filtered Tests** | `docker compose -f compose.dev.yaml exec app php artisan test --filter=<Name>` |
-| **Run API POC Tests** | `docker compose -f compose.dev.yaml exec app php artisan test --compact tests/Feature/ApiCredentialApiTest.php` |
-| **Generate Swagger/OpenAPI** | `docker compose -f compose.dev.yaml exec app php artisan l5-swagger:generate` |
-| **Run Parallel Tests** | `docker compose -f compose.dev.yaml exec app php artisan test --parallel` |
-| **Format Code (Pint)** | `docker compose -f compose.dev.yaml exec app vendor/bin/pint` |
-| **Clear App Cache** | `docker compose -f compose.dev.yaml exec app php artisan optimize:clear` |
-| **Update Boost Rules** | `docker compose -f compose.dev.yaml exec app php artisan boost:update` |
+| Kebutuhan | Laravel Herd (Host Native) | Docker Development |
+|---|---|---|
+| **Menjalankan App** | `herd link` + `npm run dev` | `docker compose -f compose.dev.yaml up -d` + `npm run dev` |
+| **Menghentikan App** | Otomatis background | `docker compose -f compose.dev.yaml down` |
+| **Eksekusi Artisan** | `php artisan <command>` | `docker compose -f compose.dev.yaml exec app php artisan <command>` |
+| **Migrasi Database** | `php artisan migrate` | `docker compose -f compose.dev.yaml exec app php artisan migrate` |
+| **Init Roles & Admin** | `php artisan role:init` | `docker compose -f compose.dev.yaml exec app php artisan role:init` |
+| **Jalankan Semua Test** | `php artisan test` | `docker compose -f compose.dev.yaml exec app php artisan test` |
+| **Test File Tertentu** | `php artisan test tests/Feature/UserControllerTest.php` | `docker compose -f compose.dev.yaml exec app php artisan test tests/Feature/UserControllerTest.php` |
+| **Filter Test Method** | `php artisan test --filter=<Name>` | `docker compose -f compose.dev.yaml exec app php artisan test --filter=<Name>` |
+| **Test POC API Sanctum** | `php artisan test --compact tests/Feature/ApiCredentialApiTest.php` | `docker compose -f compose.dev.yaml exec app php artisan test --compact tests/Feature/ApiCredentialApiTest.php` |
+| **Generate Swagger UI** | `php artisan l5-swagger:generate` | `docker compose -f compose.dev.yaml exec app php artisan l5-swagger:generate` |
+| **Jalankan Parallel Test**| `php artisan test --parallel` | `docker compose -f compose.dev.yaml exec app php artisan test --parallel` |
+| **Format Code (Pint)** | `vendor/bin/pint` | `docker compose -f compose.dev.yaml exec app vendor/bin/pint` |
+| **Clear App Cache** | `php artisan optimize:clear` | `docker compose -f compose.dev.yaml exec app php artisan optimize:clear` |
+| **Update Boost Rules** | `php artisan boost:update` | `docker compose -f compose.dev.yaml exec app php artisan boost:update` |
+| **Fix Permission (Linux)**| `sudo chown -R $USER:$USER . && chmod -R 775 storage bootstrap/cache` | N/A (Docker runtime) |
+| **Deploy Production VPS** | N/A (Docker VPS) | `docker compose -f compose.prod.yaml build && docker compose -f compose.prod.yaml up -d --remove-orphans` |
 
 ---
 
@@ -489,24 +654,36 @@ erDiagram
 Gunakan alur 5 langkah standar berikut untuk menambahkan modul/fitur baru di CMS ini secara konsisten:
 
 1. **Buat Migration & Model**:
-   ```bash
-   docker compose -f compose.dev.yaml exec app php artisan make:model Product -m
-   ```
+   - **Herd**: `php artisan make:model Product -m`
+   - **Docker**: `docker compose -f compose.dev.yaml exec app php artisan make:model Product -m`
 2. **Buat Form Request & Controller**:
-   ```bash
-   docker compose -f compose.dev.yaml exec app php artisan make:request StoreProductRequest
-   docker compose -f compose.dev.yaml exec app php artisan make:controller ProductController
-   ```
+   - **Herd**:
+     ```bash
+     php artisan make:request StoreProductRequest
+     php artisan make:controller ProductController
+     ```
+   - **Docker**:
+     ```bash
+     docker compose -f compose.dev.yaml exec app php artisan make:request StoreProductRequest
+     docker compose -f compose.dev.yaml exec app php artisan make:controller ProductController
+     ```
 3. **Daftarkan Route & Permission**:
    Tambahkan middleware `permission:product.view` pada `routes/web.php` dan daftarkan permission baru di `app/Enums/PermissionEnum.php` agar `role:init` membuatnya secara idempoten.
 4. **Buat Halaman Vue di `resources/js/Pages/Products/`**:
    Bungkus halaman dengan `<AuthenticatedLayout title="Products">` dan gunakan komponen reusable (`Card`, `TextInput`, `SearchFilterBar`, `StatusBadge`).
 5. **Buat Feature Test & Jalankan Format Code**:
-   ```bash
-   docker compose -f compose.dev.yaml exec app php artisan make:test ProductControllerTest
-   docker compose -f compose.dev.yaml exec app php artisan test --filter=ProductControllerTest
-   docker compose -f compose.dev.yaml exec app vendor/bin/pint
-   ```
+   - **Herd**:
+     ```bash
+     php artisan make:test ProductControllerTest
+     php artisan test --filter=ProductControllerTest
+     vendor/bin/pint
+     ```
+   - **Docker**:
+     ```bash
+     docker compose -f compose.dev.yaml exec app php artisan make:test ProductControllerTest
+     docker compose -f compose.dev.yaml exec app php artisan test --filter=ProductControllerTest
+     docker compose -f compose.dev.yaml exec app vendor/bin/pint
+     ```
 
 ---
 
